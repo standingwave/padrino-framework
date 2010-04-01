@@ -1,4 +1,4 @@
-project :test => :rspec, :orm => :mongoid
+project :test => :rspec, :orm => :activerecord
 
 create_model :post, {
   :title => :string, 
@@ -9,4 +9,8 @@ create_controller :posts, {
   :get => :index,
   :get => :new,
   :post => :new
+}
+
+create_migration :add_email_to_user, {
+  :email => :string
 }

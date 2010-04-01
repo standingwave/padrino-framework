@@ -32,6 +32,14 @@ class TestTemplateGenerator < Test::Unit::TestCase
       assert_match_in_file(/get :index/,'/tmp/sample_project/app/controllers/posts.rb')
     end
     
+    should "create migrations" do
+      assert_nothing_raised { silence_logger { @template.start(['sample_project', 'example_template.rb','-r=/tmp/']) } }
+      migration_file_path = "/tmp/sample_project/db/migrate/002_add_email_to_user.rb"
+      assert_match_in_file(/class AddEmailToUser/m, migration_file_path)
+      assert_match_in_file(/t.string :email/, migration_file_path)
+      assert_match_in_file(/t.remove :email/, migration_file_path)
+    end
+    
   end
 
 end

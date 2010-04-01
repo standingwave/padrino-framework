@@ -26,6 +26,11 @@ module Padrino
         Padrino::Generators::Controller.dup.start([name.to_s,params,"-r=#{@path}"].flatten)
       end
       
+      def create_migration(name,fields={})
+        params = fields.collect { |field,type| "#{field}:#{type}" }
+        Padrino::Generators::Migration.dup.start([name.to_s,params,"-r=#{@path}"].flatten)
+      end
+      
     end
   end
 end
