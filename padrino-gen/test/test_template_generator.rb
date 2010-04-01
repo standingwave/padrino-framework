@@ -7,7 +7,7 @@ class TestTemplateGenerator < Test::Unit::TestCase
     FakeWeb.allow_net_connect = false
     `rm -rf /tmp/sample_project`
     @template = Padrino::Generators::Template.dup
-    silence_logger { @template.start(['sample_project', 'example_template.rb','-r=/tmp']) }
+    silence_logger { @template.start(['sample_project', File.dirname(__FILE__)+ '/example_template.rb','-r=/tmp']) }
   end
 
   context 'the template generator' do
