@@ -14,3 +14,5 @@ create_controller :posts, {
 create_migration :add_email_to_user, {
   :email => :string
 }
+
+require_dependencies 'nokogiri'

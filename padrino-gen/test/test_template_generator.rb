@@ -37,6 +37,10 @@ class TestTemplateGenerator < Test::Unit::TestCase
       assert_match_in_file(/t.remove :email/, migration_file_path)
     end
     
+    should "include nokogiri in gemfile" do
+      assert_match_in_file(/nokogiri/, '/tmp/sample_project/Gemfile')
+    end
+    
   end
 
 end
