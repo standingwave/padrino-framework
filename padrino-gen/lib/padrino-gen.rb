@@ -59,7 +59,7 @@ end # Padrino
 ##
 # We add our generators to Padrino::Genererator
 #
-Padrino::Generators.load_paths << Dir[File.dirname(__FILE__) + '/padrino-gen/generators/{project,app,mailer,controller,model,migration}.rb']
+Padrino::Generators.load_paths << Dir[File.dirname(__FILE__) + '/padrino-gen/generators/{project,app,mailer,controller,model,migration,template}.rb']
 
 ##
 # We add our tasks to padrino-core
