@@ -21,6 +21,13 @@ module Padrino
         say "Cannot find Generator of type '#{type}'", :red
       end
       
+      # Runs rake command with given arguments
+      # rake "custom"
+      def rake(command)
+        # Dir.chdir(destination_root) { Padrino::Cli::Base.start(["rake", *command.split(" ")]) }
+        Dir.chdir(destination_root) { system("padrino rake #{command}") }
+      end
+      
     end
   end
 end

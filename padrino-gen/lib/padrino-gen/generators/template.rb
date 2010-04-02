@@ -1,4 +1,5 @@
 require File.dirname(__FILE__) + "/runner"
+require 'padrino-core/cli/base' unless defined?(Padrino::Cli::Base)
 module Padrino
   module Generators
     class Template < Thor::Group
