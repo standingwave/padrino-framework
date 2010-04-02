@@ -56,6 +56,14 @@ class TestTemplateGenerator < Test::Unit::TestCase
     should "catch error on invalid Generator type" do
       assert_match(/Cannot find Generator of type 'fake'/,@output)
     end
+    
+    should "generate app" do
+      assert_file_exists('/tmp/sample_project/testapp/app.rb')
+      assert_file_exists('/tmp/sample_project/testapp/controllers')
+      assert_file_exists('/tmp/sample_project/testapp/controllers/users.rb')
+    end
+    
+    
   end
 
   context "rake method" do

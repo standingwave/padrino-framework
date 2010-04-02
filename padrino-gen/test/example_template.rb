@@ -11,16 +11,6 @@ inject_into_file "app/models/post.rb","#Hello", :after => "end\n"
 
 initializer :test, "#Hello"
 
-=begin
-
-  project(:test => :rspec, :orm => :activerecord) do
-    generate :model, "post title:string body:text"
-    app("test") do
-      generate :controller, "posts get:index"
-    end
-  end
-  
-  require_dependencies 'nokogiri'
-  initializer :test, "hello"
-
-=end
+app :testapp do
+  generate :controller, "users get:index"
+end
