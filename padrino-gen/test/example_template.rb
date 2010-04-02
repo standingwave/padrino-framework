@@ -1,19 +1,11 @@
 project :test => :rspec, :orm => :activerecord
 
-create_model :post, {
-  :title => :string, 
-  :body => :string
-}
+generate :model, "post title:string body:text"
+generate :controller, "posts get:index get:new post:new"
+generate :migration, "AddEmailToUser email:string"
+generate :fake, "AddEmailToUser email:string"
 
-create_controller :posts, {
-  :get => :index,
-  :get => :new,
-  :post => :new
-}
-
-create_migration :add_email_to_user, {
-  :email => :string
-}
+# rake "db:migrate"
 
 require_dependencies 'nokogiri'
 

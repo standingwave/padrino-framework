@@ -1,36 +1,26 @@
 module Padrino
   module Generators
     module Runner
-
+      
+      # Generates project scaffold based on template
+      # project :test => :shoulda, :orm => :activerecord, :renderer => "haml"
       def project(options={})
         params = options.collect { |component,value| "--#{component}=#{value}" }
-        Padrino::Generators::Project.dup.start([project_name,params,"-r=#{destination_root("../")}"].flatten)
+        args = [project_name, *params].push("-r=#{destination_root("../")}")
+        Padrino::Generators::Project.start(args)
       end
 
-      def create_model(name,fields={})
-        params = fields.collect { |field,type| "#{field}:#{type}" }
-        Padrino::Generators::Model.dup.start([name.to_s,params,"-r=#{destination_root}"].flatten)
+      # Runs Generator command for designated type with given arguments
+      # generate :model, "post title:string body:text"
+      # generate :controller, "posts get:index get:new post:new"
+      # generate :migration, "AddEmailToUser email:string"
+      def generate(type,arguments)
+        params = arguments.split(" ").push("-r=#{destination_root}")
+        "Padrino::Generators::#{type.to_s.camelize}".constantize.start(params)
+      rescue NameError => e
+        say "Cannot find Generator of type '#{type}'", :red
       end
-
-      def create_controller(name,fields={})
-        params = fields.collect { |field,type| "#{field}:#{type}" }
-        Padrino::Generators::Controller.dup.start([name.to_s,params,"-r=#{destination_root}"].flatten)
-      end
-
-      def create_migration(name,fields={})
-        params = fields.collect { |field,type| "#{field}:#{type}" }
-        Padrino::Generators::Migration.dup.start([name.to_s,params,"-r=#{destination_root}"].flatten)
-      end
-
-      # def initializer(name,data=nil)
-      #   @name = name
-      #   @data = data
-      #   register = (<<-REG).gsub(/^ {10}/, '')
-      #   register #{name.to_s.capitalize}Initializer\n
-      #   REG
-      #   inject_into_file destination_root("/app/app.rb"), register, :after => "configure do\n"
-      #   template "templates/initializer.rb.tt", destination_root("/lib/#{name}.rb")
-      # end
+      
     end
   end
 end

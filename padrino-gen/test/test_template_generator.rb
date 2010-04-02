@@ -7,7 +7,7 @@ class TestTemplateGenerator < Test::Unit::TestCase
     FakeWeb.allow_net_connect = false
     `rm -rf /tmp/sample_project`
     @template = Padrino::Generators::Template.dup
-    silence_logger { @template.start(['sample_project', File.dirname(__FILE__)+ '/example_template.rb','-r=/tmp']) }
+    @output = silence_logger { @template.start(['sample_project', File.dirname(__FILE__)+ '/example_template.rb','-r=/tmp']) }
   end
 
   context 'the template generator' do
@@ -48,6 +48,10 @@ class TestTemplateGenerator < Test::Unit::TestCase
     should "create TestInitializer" do
       assert_match_in_file(/TestInitializer/,'/tmp/sample_project/app/app.rb')
       assert_file_exists('/tmp/sample_project/lib/test.rb')
+    end
+    
+    should "catch error on invalid Generator type" do
+      assert_match(/Cannot find Generator of type 'fake'/,@output)
     end
     
   end
