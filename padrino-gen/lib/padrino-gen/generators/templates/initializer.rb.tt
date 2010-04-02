@@ -1,0 +1,5 @@
+module <%= "#{@name.to_s.capitalize}Initializer" %>
+  def self.registered(app)
+    <%= @data %>
+  end
+end

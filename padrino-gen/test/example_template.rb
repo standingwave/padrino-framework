@@ -16,3 +16,7 @@ create_migration :add_email_to_user, {
 }
 
 require_dependencies 'nokogiri'
+
+inject_into_file "app/models/post.rb","#Hello", :after => "end\n"
+
+initializer :test, "#Hello"

@@ -107,6 +107,16 @@ module Padrino
         inject_into_file('Gemfile', options[:content], :after => options[:after])
       end
 
+      # Registers and Creates Initializer.
+      # initializer :test, "some stuff here"
+      def initializer(name,data=nil)
+        @name = name
+        @data = data
+        register = "  register #{name.to_s.capitalize}Initializer\n"
+        inject_into_file destination_root("/app/app.rb"), register, :after => "configure do\n"
+        template "templates/initializer.rb.tt", destination_root("/lib/#{name}.rb")
+      end
+
       ## Return true if our project has test component
       def test?
         fetch_component_choice(:test).to_s != 'none'

@@ -41,6 +41,15 @@ class TestTemplateGenerator < Test::Unit::TestCase
       assert_match_in_file(/nokogiri/, '/tmp/sample_project/Gemfile')
     end
     
+    should "inject_into_file post model" do
+      assert_match_in_file(/Hello/,'/tmp/sample_project/app/models/post.rb')
+    end
+    
+    should "create TestInitializer" do
+      assert_match_in_file(/TestInitializer/,'/tmp/sample_project/app/app.rb')
+      assert_file_exists('/tmp/sample_project/lib/test.rb')
+    end
+    
   end
 
 end
