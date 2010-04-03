@@ -1,3 +1,4 @@
+require 'grit'
 module Padrino
   module Generators
     module Runner
@@ -42,6 +43,23 @@ module Padrino
           @_appname = nil
         end
       end
+
+      # Runs Git commmands as wrapper to Grit
+      # git :init
+      # git :add
+      # git :commit "hello world"
+      def git(action,arguments=nil)
+        if action.to_s == 'init'
+          say `git init #{destination_root}`, :green
+        else
+          action = :commit_index if action == :commit
+          Dir.chdir(destination_root) do
+            @_git ||= Grit::Repo.new(".")
+            @_git.method(action).call(arguments)
+          end
+        end
+      end
+
     end
   end
 end

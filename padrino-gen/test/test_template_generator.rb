@@ -6,6 +6,7 @@ class TestTemplateGenerator < Test::Unit::TestCase
   def setup
     FakeWeb.allow_net_connect = false
     `rm -rf /tmp/sample_project`
+    `rm -rf /tmp/sample_git`
     @template = Padrino::Generators::Template.dup
   end
 
@@ -56,24 +57,40 @@ class TestTemplateGenerator < Test::Unit::TestCase
     should "catch error on invalid Generator type" do
       assert_match(/Cannot find Generator of type 'fake'/,@output)
     end
-    
+
     should "generate app" do
       assert_file_exists('/tmp/sample_project/testapp/app.rb')
       assert_file_exists('/tmp/sample_project/testapp/controllers')
       assert_file_exists('/tmp/sample_project/testapp/controllers/users.rb')
     end
-    
-    
   end
 
-  context "rake method" do
+  context "git commands" do
     setup do
-      @output = silence_logger { @template.start(['sample_project', File.dirname(__FILE__)+ '/rake_template.rb','-r=/tmp']) }
+      @output = silence_logger { @template.start(['sample_git', File.dirname(__FILE__)+ '/git_template.rb','-r=/tmp']) }
     end
 
-    should "run rake task and list tasks" do
-      assert_match_in_file(/Completed custom rake test/,'/tmp/sample_project/tmp/custom')
+    should "git init" do
+      assert_file_exists('/tmp/sample_git/.git')
+      assert_match(/Initialized/,@output)
     end
+
+    should "git add and commit" do
+      Dir.chdir("/tmp/sample_git") do
+        assert_match(/nothing to commit/,`git status`)
+      end
+    end
+
   end
+
+  # context "rake method" do
+  #   setup do
+  #     @output = silence_logger { @template.start(['sample_project', File.dirname(__FILE__)+ '/rake_template.rb','-r=/tmp']) }
+  #   end
+  #
+  #   should "run rake task and list tasks" do
+  #     assert_match_in_file(/Completed custom rake test/,'/tmp/sample_project/tmp/custom')
+  #   end
+  # end
 
 end
