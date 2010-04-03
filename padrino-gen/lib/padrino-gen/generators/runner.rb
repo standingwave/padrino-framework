@@ -15,7 +15,7 @@ module Padrino
       # generate :model, "post title:string body:text"
       # generate :controller, "posts get:index get:new post:new"
       # generate :migration, "AddEmailToUser email:string"
-      def generate(type,arguments)
+      def generate(type,arguments="")
         params = arguments.split(" ").push("-r=#{destination_root}")
         params.push("--app=#{@_appname}") if @_appname
         "Padrino::Generators::#{type.to_s.camelize}".constantize.start(params)
