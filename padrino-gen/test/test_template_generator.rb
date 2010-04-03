@@ -12,7 +12,8 @@ class TestTemplateGenerator < Test::Unit::TestCase
 
   context 'the template generator' do
     setup do
-      @output = silence_logger { @template.start(['sample_project', File.dirname(__FILE__)+ '/example_template.rb','-r=/tmp']) }
+      example_template_path = File.join(File.dirname(__FILE__), 'fixtures', 'example_template.rb')
+      @output = silence_logger { @template.start(['sample_project', example_template_path,'-r=/tmp']) }
     end
 
     should "allow template generator to generate project scaffold" do
@@ -67,7 +68,8 @@ class TestTemplateGenerator < Test::Unit::TestCase
 
   context "git commands" do
     setup do
-      @output = silence_logger { @template.start(['sample_git', File.join(File.dirname(__FILE__),'/git_template.rb'),'-r=/tmp']) }
+      git_template_path = File.join(File.dirname(__FILE__), 'fixtures', 'git_template.rb')
+      @output = silence_logger { @template.start(['sample_git', git_template_path,'-r=/tmp']) }
     end
 
     should "git init" do
@@ -81,6 +83,17 @@ class TestTemplateGenerator < Test::Unit::TestCase
       end
     end
 
+  end
+
+  context "rake method" do
+    setup do
+      rake_template_path = File.join(File.dirname(__FILE__), 'fixtures', 'rake_template.rb')
+      @output = silence_logger { @template.start(['sample_rake', rake_template_path,'-r=/tmp']) }
+    end
+
+    should "run rake task and list tasks" do
+      assert_match_in_file(/Completed custom rake test/,'/tmp/sample_rake/tmp/custom')
+    end
   end
 
 end

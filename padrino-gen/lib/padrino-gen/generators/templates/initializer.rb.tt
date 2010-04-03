@@ -1,5 +1,5 @@
-module <%= "#{@name.to_s.capitalize}Initializer" %>
+module <%= "#{@_init_name.to_s.capitalize}Initializer" %>
   def self.registered(app)
-    <%= @data %>
+<%= @_init_data %>
   end
 end

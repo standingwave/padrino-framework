@@ -11,7 +11,7 @@
 * Added default values for controllers
 * Updated sequel generation to work with sqlite3.
 * Fixes support for index routes with params.
-* included template generation.
+* Includes template generation support for a project.
 
 == 0.9.9
 
