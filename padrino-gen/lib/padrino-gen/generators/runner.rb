@@ -49,13 +49,14 @@ module Padrino
       # git :add, "."
       # git :commit, "hello world"
       def git(action,arguments=nil)
-        if action.to_s == 'init'
-          # we do this because Grit hasn't implemented init
-          say `git init #{destination_root}`, :green
-        else
-          action = :commit_index if action == :commit
-          Dir.chdir(destination_root) do
-            @_git ||= Grit::Repo.new(".")
+        Dir.chdir(destination_root) do
+          if action.to_s == 'init'
+            # we do this because Grit hasn't implemented init
+            arguments ||= destination_root
+            say `git init #{arguments}`, :green
+          else
+            action = :commit_index if action == :commit # alias :commit to :commit_index
+            @_git ||= Grit::Repo.new(destination_root)
             @_git.method(action).call(arguments)
           end
         end

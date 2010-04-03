@@ -67,7 +67,7 @@ class TestTemplateGenerator < Test::Unit::TestCase
 
   context "git commands" do
     setup do
-      @output = silence_logger { @template.start(['sample_git', File.dirname(__FILE__)+ '/git_template.rb','-r=/tmp']) }
+      @output = silence_logger { @template.start(['sample_git', File.join(File.dirname(__FILE__),'/git_template.rb'),'-r=/tmp']) }
     end
 
     should "git init" do
@@ -82,15 +82,5 @@ class TestTemplateGenerator < Test::Unit::TestCase
     end
 
   end
-
-  # context "rake method" do
-  #   setup do
-  #     @output = silence_logger { @template.start(['sample_project', File.dirname(__FILE__)+ '/rake_template.rb','-r=/tmp']) }
-  #   end
-  #
-  #   should "run rake task and list tasks" do
-  #     assert_match_in_file(/Completed custom rake test/,'/tmp/sample_project/tmp/custom')
-  #   end
-  # end
 
 end
