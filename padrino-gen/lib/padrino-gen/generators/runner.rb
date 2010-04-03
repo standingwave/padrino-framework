@@ -1,4 +1,6 @@
+require 'fileutils'
 require 'grit'
+
 module Padrino
   module Generators
     module Runner
@@ -49,7 +51,7 @@ module Padrino
       # git :add, "."
       # git :commit, "hello world"
       def git(action, arguments=nil)
-        Dir.chdir(destination_root) do
+        FileUtils.cd(destination_root) do
           if action.to_s == 'init'
             say `git init`, :green # Grit hasn't implemented init
           else
