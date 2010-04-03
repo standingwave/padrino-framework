@@ -20,22 +20,28 @@ class TestTemplateGenerator < Test::Unit::TestCase
       assert_file_exists('/tmp/sample_project')
       assert_file_exists('/tmp/sample_project/app')
       assert_file_exists('/tmp/sample_project/config/boot.rb')
-      assert_file_exists('/tmp/sample_project/spec/spec_helper.rb')
+      assert_file_exists('/tmp/sample_project/test/test_config.rb')
       assert_file_exists('/tmp/sample_project/public/favicon.ico')
     end
+    
+    should "generate project using specified components" do
+      assert_match_in_file(/ActiveRecord/, '/tmp/sample_project/config/database.rb')
+      assert_match_in_file(/Test::Unit::TestCase/, '/tmp/sample_project/test/test_config.rb')
+      assert_match_in_file(/shoulda/, '/tmp/sample_project/Gemfile')
+    end
 
-    should "create models" do
+    should "create specified models" do
       assert_file_exists('/tmp/sample_project/app/models/post.rb')
       assert_match_in_file(/class Post/, '/tmp/sample_project/app/models/post.rb')
     end
 
-    should "create controllers" do
+    should "create specified controllers" do
       assert_file_exists('/tmp/sample_project/app/controllers/posts.rb')
       assert_match_in_file(/:posts/, '/tmp/sample_project/app/controllers/posts.rb')
       assert_match_in_file(/get :index/,'/tmp/sample_project/app/controllers/posts.rb')
     end
 
-    should "create migrations" do
+    should "create specified migrations" do
       migration_file_path = "/tmp/sample_project/db/migrate/002_add_email_to_user.rb"
       assert_match_in_file(/class AddEmailToUser/m, migration_file_path)
       assert_match_in_file(/t.string :email/, migration_file_path)
@@ -51,15 +57,16 @@ class TestTemplateGenerator < Test::Unit::TestCase
     end
 
     should "create TestInitializer" do
-      assert_match_in_file(/TestInitializer/,'/tmp/sample_project/app/app.rb')
+      assert_match_in_file(/register TestInitializer/,'/tmp/sample_project/app/app.rb')
       assert_file_exists('/tmp/sample_project/lib/test.rb')
+      assert_match_in_file(/# Example/, '/tmp/sample_project/lib/test.rb')
     end
 
     should "catch error on invalid Generator type" do
-      assert_match(/Cannot find Generator of type 'fake'/,@output)
+      assert_match(/Cannot find Generator of type 'fake'/, @output)
     end
 
-    should "generate app" do
+    should "generate specified app" do
       assert_file_exists('/tmp/sample_project/testapp/app.rb')
       assert_file_exists('/tmp/sample_project/testapp/controllers')
       assert_file_exists('/tmp/sample_project/testapp/controllers/users.rb')
