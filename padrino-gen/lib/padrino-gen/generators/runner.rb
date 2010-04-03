@@ -53,7 +53,8 @@ module Padrino
       def git(action, arguments=nil)
         FileUtils.cd(destination_root) do
           if action.to_s == 'init'
-            say `git init`, :green # Grit hasn't implemented init
+            arguments ||= destination_root
+            say `git init #{arguments}`, :green # Grit hasn't implemented init
           else
             action = :commit_index if action == :commit # alias :commit to :commit_index
             @_git ||= Grit::Repo.new(destination_root)
