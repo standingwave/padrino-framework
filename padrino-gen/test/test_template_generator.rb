@@ -7,13 +7,14 @@ class TestTemplateGenerator < Test::Unit::TestCase
     FakeWeb.allow_net_connect = false
     `rm -rf /tmp/sample_project`
     `rm -rf /tmp/sample_git`
+    `rm -rf /tmp/sample_rake`
     @template = Padrino::Generators::Template.dup
   end
 
   context 'the template generator' do
     setup do
       example_template_path = File.join(File.dirname(__FILE__), 'fixtures', 'example_template.rb')
-      @output = silence_logger { @template.start(['sample_project', example_template_path,'-r=/tmp']) }
+      @output = silence_logger { @template.start(['sample_project', example_template_path, '-r=/tmp']) }
     end
 
     should "allow template generator to generate project scaffold" do
@@ -76,17 +77,17 @@ class TestTemplateGenerator < Test::Unit::TestCase
   context "git commands" do
     setup do
       git_template_path = File.join(File.dirname(__FILE__), 'fixtures', 'git_template.rb')
-      @output = silence_logger { @template.start(['sample_git', git_template_path,'-r=/tmp']) }
+      @output = silence_logger { @template.start(['sample_git', git_template_path, '-r=/tmp']) }
     end
 
     should "git init" do
       assert_file_exists('/tmp/sample_git/.git')
-      assert_match(/Initialized/,@output)
+      assert_match(/Initialized/, @output)
     end
 
     should "git add and commit" do
       Dir.chdir("/tmp/sample_git") do
-        assert_match(/nothing to commit/,`git status`)
+        assert_match(/nothing to commit/, `git status`)
       end
     end
 
@@ -95,11 +96,11 @@ class TestTemplateGenerator < Test::Unit::TestCase
   context "rake method" do
     setup do
       rake_template_path = File.join(File.dirname(__FILE__), 'fixtures', 'rake_template.rb')
-      @output = silence_logger { @template.start(['sample_rake', rake_template_path,'-r=/tmp']) }
+      @output = silence_logger { @template.start(['sample_rake', rake_template_path, '-r=/tmp']) }
     end
 
     should "run rake task and list tasks" do
-      assert_match_in_file(/Completed custom rake test/,'/tmp/sample_rake/tmp/custom')
+      assert_match_in_file(/Completed custom rake test/,'/tmp/sample_rake/tmp/custom.txt')
     end
   end
 

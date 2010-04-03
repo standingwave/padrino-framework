@@ -17,7 +17,6 @@ module Padrino
       include Padrino::Generators::Actions
       include Padrino::Generators::Runner
 
-
       desc "Description:\n\n\tpadrino-gen template generates a Padrino project from a template"
 
       argument :project_name, :desc => "The name of your padrino project"
