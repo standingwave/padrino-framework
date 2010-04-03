@@ -27,7 +27,7 @@ module Padrino
       # rake "custom"
       def rake(command)
         # Dir.chdir(destination_root) { Padrino::Cli::Base.start(["rake", *command.split(" ")]) }
-        Dir.chdir(destination_root) { system("padrino rake #{command}") }
+        Dir.chdir(destination_root) { `padrino rake #{command}` }
       end
 
       # Runs App generator
