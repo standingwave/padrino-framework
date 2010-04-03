@@ -1,5 +1,6 @@
 require File.dirname(__FILE__) + "/runner"
 require 'padrino-core/cli/base' unless defined?(Padrino::Cli::Base)
+
 module Padrino
   module Generators
     class Template < Thor::Group
@@ -20,7 +21,7 @@ module Padrino
       desc "Description:\n\n\tpadrino-gen template generates a Padrino project from a template"
 
       argument :project_name, :desc => "The name of your padrino project"
-      argument :template_path, :desc => "location of template file"
+      argument :template_path, :desc => "The location of the template file"
 
       class_option :root, :desc => "The root destination", :aliases => '-r', :default => ".",   :type => :string
       # Show help if no argv given
@@ -29,10 +30,9 @@ module Padrino
       # Create the Padrino Template
       def setup_template
         self.destination_root = File.join(options[:root], project_name)
-        code = File.open(template_path, "r") { |f| f.read }
-        instance_eval(code)
+        template_code = File.read(template_path)
+        instance_eval(template_code)
       end
-
     end # Templates  
   end # Generators
 end # Padrino
