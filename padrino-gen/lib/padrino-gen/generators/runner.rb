@@ -46,10 +46,11 @@ module Padrino
 
       # Runs Git commmands as wrapper to Grit
       # git :init
-      # git :add
-      # git :commit "hello world"
+      # git :add, "."
+      # git :commit, "hello world"
       def git(action,arguments=nil)
         if action.to_s == 'init'
+          # we do this because Grit hasn't implemented init
           say `git init #{destination_root}`, :green
         else
           action = :commit_index if action == :commit
