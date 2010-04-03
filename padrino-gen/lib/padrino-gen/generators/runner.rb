@@ -1,5 +1,5 @@
 require 'fileutils'
-require 'grit'
+require 'git'
 
 module Padrino
   module Generators
@@ -53,11 +53,10 @@ module Padrino
       def git(action, arguments=nil)
         FileUtils.cd(destination_root) do
           if action.to_s == 'init'
-            arguments ||= destination_root
-            say `git init #{arguments}`, :green # Grit hasn't implemented init
+            Git.init(arguments || destination_root)
+            say "Git repo has been initialized", :green
           else
-            action = :commit_index if action == :commit # alias :commit to :commit_index
-            @_git ||= Grit::Repo.new(destination_root)
+            @_git ||= Git.open(destination_root)
             @_git.method(action).call(arguments)
           end
         end

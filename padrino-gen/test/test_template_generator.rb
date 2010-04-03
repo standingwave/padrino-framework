@@ -82,7 +82,7 @@ class TestTemplateGenerator < Test::Unit::TestCase
 
     should "git init" do
       assert_file_exists('/tmp/sample_git/.git')
-      assert_match(/Initialized/, @output)
+      assert_match(/Initialized/i, @output)
     end
 
     should "git add and commit" do
