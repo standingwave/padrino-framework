@@ -57,8 +57,7 @@ class TestTemplateGenerator < Test::Unit::TestCase
 
     should "create TestInitializer" do
       assert_match_in_file(/register TestInitializer/,'/tmp/sample_project/app/app.rb')
-      assert_file_exists('/tmp/sample_project/lib/test.rb')
-      assert_match_in_file(/# Example/, '/tmp/sample_project/lib/test.rb')
+      assert_match_in_file(/# Example/, '/tmp/sample_project/lib/test_init.rb')
     end
 
     should "catch error on invalid Generator type" do

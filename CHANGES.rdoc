@@ -12,6 +12,7 @@
 * Updated sequel generation to work with sqlite3.
 * Fixes support for index routes with params.
 * Includes template generation support for a project.
+* Fixes SASS reload plugin issue on 1.9.X.
 
 == 0.9.9
 
