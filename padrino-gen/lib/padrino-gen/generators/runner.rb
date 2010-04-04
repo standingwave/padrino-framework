@@ -20,6 +20,10 @@ module Padrino
       def generate(type, arguments="")
         params = arguments.split(" ").push("-r=#{destination_root}")
         params.push("--app=#{@_appname}") if @_appname
+        if type.to_s =~ /admin/ && !defined?(Padrino::Generators::AdminApp)
+          require File.expand_path(File.dirname(__FILE__) + '/../../../../padrino-admin/lib/padrino-admin')
+          Padrino::Generators.load_components!
+        end
         generator = Padrino::Generators.mappings[type.to_sym]
         generator ? generator.start(params) : say("Cannot find Generator of type '#{type}'", :red)
       end

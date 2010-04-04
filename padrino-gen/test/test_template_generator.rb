@@ -5,16 +5,14 @@ require 'fakeweb'
 class TestTemplateGenerator < Test::Unit::TestCase
   def setup
     FakeWeb.allow_net_connect = false
-    `rm -rf /tmp/sample_project`
-    `rm -rf /tmp/sample_git`
-    `rm -rf /tmp/sample_rake`
+    [:sample_project, :sample_git, :sample_rake, :sample_admin].each { |proj| system("rm -rf /tmp/#{proj}") }
     @template = Padrino::Generators::Template.dup
   end
 
   context 'the template generator' do
     setup do
       example_template_path = File.join(File.dirname(__FILE__), 'fixtures', 'example_template.rb')
-      @output = silence_logger { @template.start(['sample_project', example_template_path, '-r=/tmp']) }
+      @output = silence_logger { @template.dup.start(['sample_project', example_template_path, '-r=/tmp']) }
     end
 
     should "allow template generator to generate project scaffold" do
@@ -24,7 +22,7 @@ class TestTemplateGenerator < Test::Unit::TestCase
       assert_file_exists('/tmp/sample_project/test/test_config.rb')
       assert_file_exists('/tmp/sample_project/public/favicon.ico')
     end
-    
+
     should "generate project using specified components" do
       assert_match_in_file(/ActiveRecord/, '/tmp/sample_project/config/database.rb')
       assert_match_in_file(/Test::Unit::TestCase/, '/tmp/sample_project/test/test_config.rb')
@@ -74,7 +72,7 @@ class TestTemplateGenerator < Test::Unit::TestCase
     end
   end
 
-  context "git commands" do
+  context "with git commands" do
     setup do
       git_template_path = File.join(File.dirname(__FILE__), 'fixtures', 'git_template.rb')
       @output = silence_logger { @template.start(['sample_git', git_template_path, '-r=/tmp']) }
@@ -90,10 +88,9 @@ class TestTemplateGenerator < Test::Unit::TestCase
         assert_match(/nothing to commit/, `git status`)
       end
     end
-
   end
 
-  context "rake method" do
+  context "with rake method" do
     setup do
       rake_template_path = File.join(File.dirname(__FILE__), 'fixtures', 'rake_template.rb')
       @output = silence_logger { @template.start(['sample_rake', rake_template_path, '-r=/tmp']) }
@@ -101,6 +98,31 @@ class TestTemplateGenerator < Test::Unit::TestCase
 
     should "run rake task and list tasks" do
       assert_match_in_file(/Completed custom rake test/,'/tmp/sample_rake/tmp/custom.txt')
+    end
+  end
+
+  context "with admin commands" do
+    setup do
+      admin_template_path = File.join(File.dirname(__FILE__), 'fixtures', 'admin_template.rb')
+      @output = silence_logger { @template.dup.start(['sample_admin', admin_template_path, '-r=/tmp']) }
+    end
+
+    should "create specified models" do
+      assert_file_exists('/tmp/sample_admin/app/models/post.rb')
+      assert_match_in_file(/class Post/, '/tmp/sample_admin/app/models/post.rb')
+    end
+
+    should "generate admin application" do
+      assert_file_exists('/tmp/sample_admin/app/models/account.rb')
+      assert_file_exists('/tmp/sample_admin/admin/app.rb')
+      assert_file_exists('/tmp/sample_admin/admin/views')
+      assert_file_exists('/tmp/sample_admin/admin/controllers/accounts.rb')
+      assert_file_exists('/tmp/sample_admin/admin/views/accounts/new.haml')
+    end
+
+    should "generate admin page for posts" do
+      # assert_file_exists('/tmp/sample_admin/admin/controllers/posts.rb')
+      # assert_file_exists('/tmp/sample_admin/admin/views/posts/new.haml')
     end
   end
 
