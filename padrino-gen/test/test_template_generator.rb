@@ -121,8 +121,8 @@ class TestTemplateGenerator < Test::Unit::TestCase
     end
 
     should "generate admin page for posts" do
-      # assert_file_exists('/tmp/sample_admin/admin/controllers/posts.rb')
-      # assert_file_exists('/tmp/sample_admin/admin/views/posts/new.haml')
+      assert_file_exists('/tmp/sample_admin/admin/controllers/posts.rb')
+      assert_file_exists('/tmp/sample_admin/admin/views/posts/new.haml')
     end
   end
 
