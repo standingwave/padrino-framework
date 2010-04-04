@@ -13,6 +13,7 @@
 * Fixes support for index routes with params.
 * Includes template generation support for a project.
 * Fixes SASS reload plugin issue on 1.9.X.
+* Fixes an issue with generator not casing controller / model names
 
 == 0.9.9
 
