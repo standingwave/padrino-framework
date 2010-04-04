@@ -20,10 +20,6 @@ module Padrino
           :hosted_at => '/stylesheets'
           LESS
 
-          LESS_REGISTER = (<<-LESSR).gsub(/^ {10}/, '')
-              register LessInitializer\n
-          LESSR
-
           def setup_stylesheet
             require_dependencies 'less', 'rack-less'
             initializer :less, LESS_INIT
