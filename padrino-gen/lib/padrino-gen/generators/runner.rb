@@ -20,9 +20,8 @@ module Padrino
       def generate(type, arguments="")
         params = arguments.split(" ").push("-r=#{destination_root}")
         params.push("--app=#{@_appname}") if @_appname
-        "Padrino::Generators::#{type.to_s.camelize}".constantize.start(params)
-      rescue NameError => e
-        say "Cannot find Generator of type '#{type}'", :red
+        generator = Padrino::Generators.mappings[type.to_sym]
+        generator ? generator.start(params) : say("Cannot find Generator of type '#{type}'", :red)
       end
 
       # Executes rake command with given arguments
