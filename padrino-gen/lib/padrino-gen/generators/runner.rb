@@ -21,7 +21,8 @@ module Padrino
         params = arguments.split(" ").push("-r=#{destination_root}")
         params.push("--app=#{@_appname}") if @_appname
         if type.to_s =~ /admin/ && !defined?(Padrino::Generators::AdminApp)
-          Dir.chdir(destination_root) { require 'config/boot.rb' } # Loads the application environment
+           # Loads the application environment and the admin generators
+          Dir.chdir(destination_root) { require File.join(destination_root, 'config/boot.rb') }
           require File.expand_path(File.dirname(__FILE__) + '/../../../../padrino-admin/lib/padrino-admin')
           Padrino::Generators.load_components!
         end
