@@ -1,5 +1,6 @@
 require File.dirname(__FILE__) + "/runner"
 require 'padrino-core/cli/base' unless defined?(Padrino::Cli::Base)
+require 'open-uri'
 
 module Padrino
   module Generators
@@ -31,7 +32,11 @@ module Padrino
       def setup_template
         # TODO: Thor::Sandbox && download through http for gists
         self.destination_root = File.join(options[:root], project_name)
-        template_code = File.read(template_path)
+        if template_path =~ /http/
+          template_code = open(template_path).read
+        else
+          template_code = File.read(template_path)
+        end
         instance_eval(template_code)
       end
     end # Templates
