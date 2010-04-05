@@ -58,6 +58,16 @@ unless Hash.method_defined?(:to_params)
   end
 end
 
+module Padrino
+  ##
+  # This method return the correct location of padrino bin or
+  # exec it using Kernel#system with the given args
+  #
+  def self.bin(*args)
+    @_padrino_bin ||= File.expand_path("../../../bin/padrino", __FILE__)
+    args.empty? ? @_padrino_bin : system(args.unshift(@_padrino_bin).join(" "))
+  end
+end
 ##
 # Loads our locales configuration files
 #

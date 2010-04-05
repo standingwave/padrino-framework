@@ -8,9 +8,10 @@ module Padrino
       # Generates project scaffold based on a given template file
       # project :test => :shoulda, :orm => :activerecord, :renderer => "haml"
       def project(options={})
-        components = options.collect { |component,value| "--#{component}=#{value}" }
+        components = options.collect { |component, value| "--#{component}=#{value}" }
         params = [project_name, *components].push("-r=#{destination_root("../")}")
-        Padrino::Generators::Project.start(params)
+        say "=> Generating project #{project_name} with options: #{params.join(" ")}", :yellow
+        Padrino.bin_gen(*params.unshift("project"))
       end
 
       # Executes generator command for specified type with given arguments
@@ -19,18 +20,15 @@ module Padrino
       # generate :migration, "AddEmailToUser email:string"
       def generate(type, arguments="")
         params = arguments.split(" ").push("-r=#{destination_root}")
-        params.push("--app=#{@_appname}") if @_appname
-        Dir.chdir(destination_root) { require 'config/boot' }
-        Padrino::Generators.load_components!
-        generator = Padrino::Generators.mappings[type.to_sym]
-        generator ? generator.start(params) : say("Cannot find Generator of type '#{type}'", :red)
+        params.push("--app=#{@_app_name}") if @_app_name
+        say "=> Generating #{type} with options: #{params.join(" ")}", :yellow
+        Padrino.bin_gen(*params.unshift(type))
       end
 
       # Executes rake command with given arguments
       # rake "custom task1 task2"
       def rake(command)
-        # Dir.chdir(destination_root) { Padrino::Cli::Base.start(["rake", *command.split(" ")]) }
-        Dir.chdir(destination_root) { system("padrino rake #{command}") }
+        Padrino.bin("rake", command, "-c=#{destination_root}")
       end
 
       # Executes App generator. Accepts an optional block allowing generation inside subapp.
@@ -39,11 +37,12 @@ module Padrino
       #  generate :model, "posts title:string"
       # end
       def app(name, &block)
-        Padrino::Generators::App.start([name.to_s, "-r=#{destination_root}"])
+        say "=> Generating app #{name} in #{destination_root}", :yellow
+        Padrino.bin_gen("app", name, "-r=#{destination_root}")
         if block_given?
-          @_appname = name.to_s
+          @_app_name = name
           block.call
-          @_appname = nil
+          @_app_name = nil
         end
       end
 
@@ -63,6 +62,10 @@ module Padrino
         end
       end
 
-    end
-  end
-end
+      private
+        def padrino_gen
+          File.expand_path("../../../../bin/padrino-gen", __FILE__)
+        end
+    end # Runner
+  end # Generators
+end # Padrino

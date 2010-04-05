@@ -74,7 +74,7 @@ module Padrino
 
       # Returns the root for this thor class (also aliased as destination root).
       def destination_root(*paths)
-        File.join(@destination_stack.last, paths)
+        File.expand_path(File.join(@destination_stack.last, paths))
       end
 
       # Returns true if inside a Padrino application
