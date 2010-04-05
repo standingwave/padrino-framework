@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + "/runner"
+require File.dirname(__FILE__) + "/runner" # TODO: use File.expand_path because we can have some problems with ruby 1.9.2
 require 'padrino-core/cli/base' unless defined?(Padrino::Cli::Base)
 require 'open-uri'
 
@@ -32,6 +32,8 @@ module Padrino
       def setup_template
         # TODO: Thor::Sandbox && download through http for gists
         self.destination_root = File.join(options[:root], project_name)
+        # TODO: Check if we can use open(real_file).read i think it can work also with local files
+        # TODO: Create in runner a "download" method for those that need to create from gists some libs.
         template_code = (template_path =~ /^http/ ? open(template_path).read : File.read(template_path))
         instance_eval(template_code)
       end
