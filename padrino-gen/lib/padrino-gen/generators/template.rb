@@ -31,8 +31,12 @@ module Padrino
       def setup_template
         # TODO: Thor::Sandbox && download through http for gists
         self.destination_root = File.join(options[:root], project_name)
-        template_code = download(template_path)
-        instance_eval(template_code)
+        template_link = template_path
+        if template_path =~ /gist/
+          raw_link = Mechanize.new.get(template_path).links_with(:href => /raw/).first.href
+          template_link = "http://gist.github.com" + raw_link
+        end
+        apply(template_link)
       end
     end # Templates
   end # Generators
