@@ -1,5 +1,7 @@
 require 'fileutils'
 require 'git'
+require 'open-uri'
+require 'mechanize'
 
 module Padrino
   module Generators
@@ -62,6 +64,20 @@ module Padrino
           end
         end
       end
+
+      ## downloads file from both local or remote or gist
+      # download "http://example.com/somefile.rb"
+      # download "http://gist.github.com/somefile"
+      # download "/tmp/myfile.rb"
+      def download(file)
+        return case file
+        when /gist/
+          Mechanize.new.get(file).links_with(:href => /raw/).first.click.body
+        else
+          open(file).read
+        end
+      end
+
 
     end
   end
