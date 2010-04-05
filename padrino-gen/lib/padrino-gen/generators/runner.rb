@@ -61,11 +61,6 @@ module Padrino
           end
         end
       end
-
-      private
-        def padrino_gen
-          File.expand_path("../../../../bin/padrino-gen", __FILE__)
-        end
     end # Runner
   end # Generators
 end # Padrino
