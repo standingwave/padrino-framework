@@ -32,11 +32,7 @@ module Padrino
       def setup_template
         # TODO: Thor::Sandbox && download through http for gists
         self.destination_root = File.join(options[:root], project_name)
-        if template_path =~ /http/
-          template_code = open(template_path).read
-        else
-          template_code = File.read(template_path)
-        end
+        template_code = (template_path =~ /^http/ ? open(template_path).read : File.read(template_path))
         instance_eval(template_code)
       end
     end # Templates
