@@ -1,4 +1,4 @@
-project :test => :shoulda, :orm => :activerecord
+project :test => :shoulda, :orm => :activerecord, :dev => true
 
 generate :model, "post title:string body:text"
 rake "ar:create ar:migrate"

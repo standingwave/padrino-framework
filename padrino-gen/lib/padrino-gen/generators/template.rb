@@ -23,15 +23,17 @@ module Padrino
       argument :template_path, :desc => "The location of the template file"
 
       class_option :root, :desc => "The root destination", :aliases => '-r', :default => ".",   :type => :string
+
       # Show help if no argv given
       require_arguments!
 
       # Create the Padrino Template
       def setup_template
+        # TODO: Thor::Sandbox && download through http for gists
         self.destination_root = File.join(options[:root], project_name)
         template_code = File.read(template_path)
         instance_eval(template_code)
       end
-    end # Templates  
+    end # Templates
   end # Generators
 end # Padrino

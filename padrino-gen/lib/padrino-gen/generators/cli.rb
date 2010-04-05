@@ -11,19 +11,20 @@ module Padrino
       # Include related modules
       include Thor::Actions
 
-      class_option :root, :desc => "The root destination", :aliases => '-r', :default => nil, :type => :string
+      class_option :root, :desc => "The root destination", :aliases => '-r', :default => ".", :type => :string
 
       # We need to TRY to load boot because some of our app dependencies maybe have
       # custom generators, so is necessary know who are.
       def load_boot
         begin
           ENV['PADRINO_LOG_LEVEL'] ||= "test"
-          boot = options[:root] ? File.join(options[:root], 'config/boot.rb') : 'config/boot.rb'
-          if File.exist?(boot)
-            require boot
-          else
-            # If we are outside app we need to load support_lite
-            require 'padrino-core/support_lite'
+          Dir.chdir(options[:root]) do
+            if File.exist?('config/boot.rb')
+              require 'config/boot.rb'
+            else
+              # If we are outside app we need to load support_lite
+              require 'padrino-core/support_lite'
+            end
           end
         rescue Exception => e
           puts "=> Problem loading config/boot.rb"

@@ -34,7 +34,7 @@ module Padrino
       # rake "custom task1 task2"
       def rake(command)
         # Dir.chdir(destination_root) { Padrino::Cli::Base.start(["rake", *command.split(" ")]) }
-        Dir.chdir(destination_root) { `padrino rake #{command}` }
+        Dir.chdir(destination_root) { system("padrino rake #{command}") }
       end
 
       # Executes App generator. Accepts an optional block allowing generation inside subapp.

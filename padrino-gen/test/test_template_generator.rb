@@ -124,5 +124,4 @@ class TestTemplateGenerator < Test::Unit::TestCase
       assert_file_exists('/tmp/sample_admin/admin/views/posts/new.haml')
     end
   end
-
 end
