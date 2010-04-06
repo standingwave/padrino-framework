@@ -1,5 +1,4 @@
 require 'fileutils'
-require 'git'
 
 module Padrino
   module Generators
@@ -52,8 +51,9 @@ module Padrino
       # git :commit, "hello world"
       def git(action, arguments=nil)
         FileUtils.cd(destination_root) do
+          require 'git' unless defined?(::Git)
           if action.to_s == 'init'
-            Git.init(arguments || destination_root)
+            ::Git.init(arguments || destination_root)
             say "Git repo has been initialized", :green
           else
             @_git ||= Git.open(destination_root)
