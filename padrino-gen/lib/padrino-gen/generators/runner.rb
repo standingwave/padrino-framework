@@ -9,7 +9,7 @@ module Padrino
       def project(options={})
         components = options.collect { |component, value| "--#{component}=#{value}" }
         params = [project_name, *components].push("-r=#{destination_root("../")}")
-        say "=> Generating project #{project_name} with options: #{params.join(" ")}", :yellow
+        say "=> Executing: padrino-gen #{project_name} #{params.join(" ")}", :magenta
         Padrino.bin_gen(*params.unshift("project"))
       end
 
@@ -20,7 +20,7 @@ module Padrino
       def generate(type, arguments="")
         params = arguments.split(" ").push("-r=#{destination_root}")
         params.push("--app=#{@_app_name}") if @_app_name
-        say "=> Generating #{type} with options: #{params.join(" ")}", :yellow
+        say "=> Executing: padrino-gen #{type} #{params.join(" ")}", :magenta
         Padrino.bin_gen(*params.unshift(type))
       end
 
@@ -36,7 +36,7 @@ module Padrino
       #  generate :model, "posts title:string"
       # end
       def app(name, &block)
-        say "=> Generating app #{name} in #{destination_root}", :yellow
+        say "=> Executing: padrino-gen app #{name} -r=#{destination_root}", :magenta
         Padrino.bin_gen("app", name, "-r=#{destination_root}")
         if block_given?
           @_app_name = name
