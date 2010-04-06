@@ -1,5 +1,6 @@
 require 'fileutils'
 require 'git'
+require 'mechanize'
 
 module Padrino
   module Generators
@@ -61,6 +62,12 @@ module Padrino
           end
         end
       end
+      ## return raw gist url
+      def gist_path(url)
+        raw_link = Mechanize.new.get(template_path).links_with(:href => /raw/).first.href
+        "http://gist.github.com" + raw_link
+      end
+      
     end # Runner
   end # Generators
 end # Padrino
