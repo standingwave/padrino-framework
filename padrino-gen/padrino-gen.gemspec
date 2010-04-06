@@ -119,7 +119,6 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<padrino-core>, ["= 0.9.9"])
       s.add_runtime_dependency(%q<git>, [">= 1.2.1"])
-      s.add_runtime_dependency(%q<mechanize>, [">= 1.0.0"])
       s.add_development_dependency(%q<haml>, [">= 2.2.1"])
       s.add_development_dependency(%q<shoulda>, [">= 2.10.3"])
       s.add_development_dependency(%q<mocha>, [">= 0.9.7"])
@@ -129,7 +128,6 @@ Gem::Specification.new do |s|
     else
       s.add_dependency(%q<padrino-core>, ["= 0.9.9"])
       s.add_dependency(%q<git>, [">= 1.2.1"])
-      s.add_dependency(%q<mechanize>, [">= 1.0.0"])
       s.add_dependency(%q<haml>, [">= 2.2.1"])
       s.add_dependency(%q<shoulda>, [">= 2.10.3"])
       s.add_dependency(%q<mocha>, [">= 0.9.7"])
@@ -140,7 +138,6 @@ Gem::Specification.new do |s|
   else
     s.add_dependency(%q<padrino-core>, ["= 0.9.9"])
     s.add_dependency(%q<git>, [">= 1.2.1"])
-    s.add_dependency(%q<mechanize>, [">= 1.0.0"])
     s.add_dependency(%q<haml>, [">= 2.2.1"])
     s.add_dependency(%q<shoulda>, [">= 2.10.3"])
     s.add_dependency(%q<mocha>, [">= 0.9.7"])

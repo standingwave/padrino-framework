@@ -30,8 +30,11 @@ module Padrino
       # Create the Padrino Template
       def setup_template
         self.destination_root = File.join(options[:root], project_name)
-        path = template_path =~ /^http\:\/\// ? template_path : File.expand_path(template_path)
-        path = gist_path(template_path) if template_path =~ /gist\.github\.com/ && !(template_path =~ /gist\.github\.com\/raw/)
+        path = template_path =~ %r{^http://} ? template_path : File.expand_path(template_path)
+        if template_path =~ /gist/ && template_path !~ /raw/
+          raw_link = open(template_path).read.scan(/<a\s+href\s?\=\"(.*?)\"\>raw/)[0][0] rescue nil
+          path = "http://gist.github.com#{raw_link}" if raw_link
+        end
         apply(path)
       end
     end # Templates
