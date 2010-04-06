@@ -1,6 +1,5 @@
 require 'fileutils'
 require 'git'
-require 'mechanize'
 
 module Padrino
   module Generators
