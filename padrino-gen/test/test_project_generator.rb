@@ -18,6 +18,14 @@ class TestProjectGenerator < Test::Unit::TestCase
       assert_file_exists('/tmp/sample_project/spec/spec_helper.rb')
       assert_file_exists('/tmp/sample_project/public/favicon.ico')
     end
+    
+    should "generate tiny skeleton" do
+      assert_nothing_raised { silence_logger { @project.start(['sample_project', '--tiny','--root=/tmp', '--script=none']) } }
+      assert_file_exists('/tmp/sample_project')
+      assert_file_exists('/tmp/sample_project/app')
+      assert_file_exists('/tmp/sample_project/app/controllers.rb')
+      assert_file_exists('/tmp/sample_project/app/helpers.rb')
+    end
 
     should "not create models folder if no orm is chosen" do
       silence_logger { @project.start(['sample_project', '--root=/tmp', '--script=none', '--orm=none']) }

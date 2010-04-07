@@ -107,6 +107,19 @@ module Padrino
         inject_into_file('Gemfile', options[:content], :after => options[:after])
       end
 
+
+      # For Generating Tiny/Standard App Generation
+      def app_skeleton(app,tiny)
+        directory("app/", destination_root(app))
+        if tiny
+          template "templates/controller.rb.tt", destination_root("#{app}/controllers.rb")
+          template "templates/helper.rb.tt", destination_root("#{app}/helpers.rb")
+        else
+          empty_directory destination_root("#{app}/controllers/")
+          empty_directory destination_root("#{app}/helpers/")
+        end
+      end
+
       ## Return true if our project has test component
       def test?
         fetch_component_choice(:test).to_s != 'none'
