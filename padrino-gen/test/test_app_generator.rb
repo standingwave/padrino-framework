@@ -41,6 +41,8 @@ class TestAppGenerator < Test::Unit::TestCase
       assert_file_exists('/tmp/sample_project/demo')
       assert_file_exists('/tmp/sample_project/demo/helpers.rb')
       assert_file_exists('/tmp/sample_project/demo/controllers.rb')
+      assert_no_file_exists('/tmp/sample_project/demo/helpers')
+      assert_no_file_exists('/tmp/sample_project/demo/controllers')
     end
 
     should "correctly create a new controller inside a padrino application" do

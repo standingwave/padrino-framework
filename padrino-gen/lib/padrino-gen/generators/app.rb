@@ -18,7 +18,7 @@ module Padrino
 
       argument :name, :desc => "The name of your padrino application"
 
-      class_option :tiny,         :desc => "Generate tiny app skeleton", :aliases => '-a', :default => false, :type => :boolean
+      class_option :tiny, :desc => "Generate tiny app skeleton", :aliases => '-a', :default => false, :type => :boolean
       class_option :root, :desc => "The root destination", :aliases => '-r', :default => ".", :type => :string
       class_option :destroy, :aliases => '-d', :default => false,   :type    => :boolean
 
