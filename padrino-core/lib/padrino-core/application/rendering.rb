@@ -39,6 +39,24 @@ module Padrino
         return super(name, &block) if block_given?
         @_layout = name
       end
+
+      ##
+      # Returns the cached template file to render for a given url, content_type and locale.  
+      #
+      # render_options = [template_path, content_type, locale]
+      #
+      def fetch_template_file(render_options)
+        (@_cached_templates ||= {})[render_options]
+      end
+      
+      ###
+      # Caches the template file for the given rendering options 
+      # 
+      # render_options = [template_path, content_type, locale]
+      # 
+      def cache_template_file!(template_file, render_options)
+        (@_cached_templates ||= {})[render_options] = template_file || []
+      end
     end
 
     private
@@ -69,7 +87,7 @@ module Padrino
         # Resolve layouts similar to in Rails
         if (options[:layout].nil? || options[:layout] == true) && !self.class.templates.has_key?(:layout)
           options[:layout] = resolved_layout
-          logger.debug "Resolving layout #{options[:layout]}" if defined?(logger) && options[:layout]
+          logger.debug "Resolving layout #{options[:layout]}" if defined?(logger) && options[:layout].present?
         end
 
         # Pass arguments to Sinatra render method
@@ -88,7 +106,7 @@ module Padrino
         layout_var = self.class.instance_variable_get(:@_layout) || :application
         has_layout_at_root = Dir["#{self.settings.views}/#{layout_var}.*"].any?
         layout_path = has_layout_at_root ? layout_var.to_sym : File.join('layouts', layout_var.to_s).to_sym
-        resolve_template(layout_path, :strict_format => true)[0] rescue nil
+        located_template = resolve_template(layout_path, :strict_format => true)[0] rescue nil
       end
 
       ##
@@ -105,28 +123,44 @@ module Padrino
       #   # If you request "/foo" with I18n.locale == :de => [:"/path/to/foo.de.haml", :haml]
       #
       def resolve_template(template_path, options={})
+        # Fetch cached template for rendering options
+        template_path = "/#{template_path}" unless template_path.to_s =~ %r{^/}
+        rendering_options = [template_path, content_type, locale]
+        cached_template = self.class.fetch_template_file(rendering_options)
+        return cached_template if cached_template
+
+        # Resolve view path and options
         options.reverse_merge!(:strict_format => false)
         view_path = options.delete(:views) || self.options.views || self.class.views || "./views"
-        template_path = "/#{template_path}" unless template_path.to_s =~ /^\//
         target_extension = File.extname(template_path)[1..-1] || "none" # retrieves explicit template extension
         template_path = template_path.chomp(".#{target_extension}")
 
+        # Generate potential template candidates
         templates = Dir[File.join(view_path, template_path) + ".*"].map do |file|
           template_engine = File.extname(file)[1..-1].to_sym # retrieves engine extension
           template_file   =  file.sub(view_path, '').chomp(".#{template_engine}").to_sym # retrieves template filename
           [template_file, template_engine] unless IGNORE_FILE_PATTERN.any? { |pattern| template_engine.to_s =~ pattern }
         end
 
+        # Resolve final template to render
         located_template =
-          templates.find { |file, e| defined?(I18n) && file.to_s == "#{template_path}.#{I18n.locale}.#{content_type}" } ||
-          templates.find { |file, e| defined?(I18n) && file.to_s == "#{template_path}.#{I18n.locale}" && content_type == :html } ||
+          templates.find { |file, e| file.to_s == "#{template_path}.#{locale}.#{content_type}" } ||
+          templates.find { |file, e| file.to_s == "#{template_path}.#{locale}" && content_type == :html } ||
           templates.find { |file, e| File.extname(file.to_s) == ".#{target_extension}" or e.to_s == target_extension.to_s } ||
           templates.find { |file, e| file.to_s == "#{template_path}.#{content_type}" } ||
           templates.find { |file, e| file.to_s == "#{template_path}" && content_type == :html } ||
           templates.any? && !options[:strict_format] && templates.first # If not strict, fall back to the first located template
 
-        raise TemplateNotFound.new("Template path '#{template_path}' could not be located!") unless located_template
+        self.class.cache_template_file!(located_template, rendering_options) unless settings.reload_templates?
+        raise TemplateNotFound.new("Template path '#{template_path}' could not be located!")  unless located_template
         located_template
+      end
+
+      ##
+      # Return the I18n.locale if I18n is defined
+      #
+      def locale
+        I18n.locale if defined?(I18n)
       end
   end # Rendering
 end # Padrino
