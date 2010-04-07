@@ -2,6 +2,8 @@
 
 == 0.9.10 (Unreleased)
 
+* Performance Tuning: Cached templates
+* Performance Tuning: Cached routes
 * Danish translation [Thanks to Molte]
 * Russian translation [Thanks to Imm]
 * Added +extcore+ as a javascript option in project generator [Thanks to Imm]
@@ -16,6 +18,8 @@
 * Fixes support for index routes with params.
 * Fixes SASS reload plugin issue on 1.9.X.
 * Fixes an issue with generator not casing controller / model names
+* Added sequel support for padrino-admin [Thanks to Aemadrid]
+* Added basic sequel migration tasks [Thanks to Aemadrid]
 
 == 0.9.9
 
