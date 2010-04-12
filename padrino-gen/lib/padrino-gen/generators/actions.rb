@@ -111,7 +111,7 @@ module Padrino
       # initializer :test, "some stuff here"
       def initializer(name,data=nil)
         @_init_name, @_init_data = name, data
-        register = "  register #{name.to_s.capitalize}Initializer\n"
+        register = "    register #{name.to_s.capitalize}Initializer\n"
         inject_into_file destination_root("/app/app.rb"), register, :after => "configure do\n"
         template "templates/initializer.rb.tt", destination_root("/lib/#{name}_init.rb")
       end
