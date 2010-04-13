@@ -8,8 +8,8 @@ module Padrino
       # project :test => :shoulda, :orm => :activerecord, :renderer => "haml"
       def project(options={})
         components = options.collect { |component, value| "--#{component}=#{value}" }
-        params = [project_name, *components].push("-r=#{destination_root("../")}")
-        say "=> Executing: padrino-gen #{project_name} #{params.join(" ")}", :magenta
+        params = [name, *components].push("-r=#{destination_root("../")}")
+        say "=> Executing: padrino-gen #{name} #{params.join(" ")}", :magenta
         Padrino.bin_gen(*params.unshift("project"))
       end
 
@@ -70,23 +70,20 @@ module Padrino
       # resolve_template_paths('plugin', 'hoptoad')
       # resolve_template_paths('sample_blog', 'sampleblog')
       # resolve_template_paths('sample_blog', 'http://gist.github.com/357045')
-      def resolve_template_paths(project_name, template_file)
-        # Determine project_root
-        project_root = (project_name == "plugin" ? options[:root] : File.join(options[:root], project_name))
+      def resolve_template_paths(type, template_file)
         # Determine resolved template path
-        resolved_path = case
-          when template_file =~ %r{^http://} && template_file !~ /gist/
-            template_file
-          when template_file =~ /gist/ && template_file !~ /raw/
-            raw_link = open(template_file).read.scan(/<a\s+href\s?\=\"(.*?)\"\>raw/)
-            raw_link ? "http://gist.github.com#{raw_link}" : template_file
-          when File.extname(template_file).blank? # referencing official plugin (i.e hoptoad)
-            kind = project_name == "plugin" ? "plugin" : "template"
-            "http://github.com/padrino/padrino-recipes/raw/master/#{kind.pluralize}/#{template_file}_#{kind}.rb"
-          else # local file on system
-            File.expand_path(template_file)
+        case
+        when template_file =~ %r{^http://} && template_file !~ /gist/
+          template_file
+        when template_file =~ /gist/ && template_file !~ /raw/
+          raw_link = open(template_file).read.scan(/<a\s+href\s?\=\"(.*?)\"\>raw/)
+          raw_link ? "http://gist.github.com#{raw_link}" : template_file
+        when File.extname(template_file).blank? # referencing official plugin (i.e hoptoad)
+          kind = type.to_s
+          "http://github.com/padrino/padrino-recipes/raw/master/#{kind.pluralize}/#{template_file}_#{kind}.rb"
+        else # local file on system
+          File.expand_path(template_file)
         end
-        [project_root, resolved_path]
       end
     end # Runner
   end # Generators

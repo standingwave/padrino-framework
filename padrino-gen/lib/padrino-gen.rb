@@ -6,7 +6,7 @@ module Padrino
   # exec it using Kernel#system with the given args
   #
   def self.bin_gen(*args)
-    @_padrino_gen_bin ||= File.expand_path("../../bin/padrino-gen", __FILE__)
+    @_padrino_gen_bin ||= [Padrino.ruby_command, File.expand_path("../../bin/padrino-gen", __FILE__)]
     args.empty? ? @_padrino_gen_bin : system(args.unshift(@_padrino_gen_bin).join(" "))
   end
 
@@ -67,7 +67,7 @@ end # Padrino
 ##
 # We add our generators to Padrino::Genererator
 #
-Padrino::Generators.load_paths << Dir[File.dirname(__FILE__) + '/padrino-gen/generators/{project,app,mailer,controller,model,migration,template}.rb']
+Padrino::Generators.load_paths << Dir[File.dirname(__FILE__) + '/padrino-gen/generators/{project,app,mailer,controller,model,migration,template,plugin}.rb']
 
 ##
 # We add our tasks to padrino-core
