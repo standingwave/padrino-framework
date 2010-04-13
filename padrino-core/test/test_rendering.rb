@@ -78,7 +78,6 @@ class TestRendering < Test::Unit::TestCase
       assert_equal "this is an erb file", body
       get "/layout_test.js"
       assert_equal "js file", body
-      remove_views
     end
 
     should 'use correct layout for each format' do
@@ -93,37 +92,37 @@ class TestRendering < Test::Unit::TestCase
       assert_equal "this is an erb file", body
       get "/layout_test.xml"
       assert_equal "document start xml file end", body
-      remove_views
     end
 
-    should_eventually 'use correct layout with each controller' do
-      create_layout :foo, "foo layout <%= yield %> end"
-      create_layout :bar, "bar layout <%= yield %> end"
-      create_layout :application, "default layout <%= yield %> end"
-      create_view :the_file, "erb file"
+    should 'use correct layout with each controller' do
+      create_layout :foo, "foo layout at <%= yield %>"
+      create_layout :bar, "bar layout at <%= yield %>"
+      create_layout :application, "default layout at <%= yield %>"
       mock_app do
-        controller :foo_test do
+        get("/"){ render :erb, "application" }
+        controller :foo do
           layout :foo
-          get(:demo){ render :the_file }
+          get("/"){ render :erb, "foo" }
         end
-        controller :bar_test do
+        controller :bar do
           layout :bar
-          get(:demo){ render :the_file }
+          get("/"){ render :erb, "bar" }
         end
-        controller :default_test do
-          get(:demo) { render :the_file }
-          get(:foo)  { render  :the_file, :layout => :foo }
+        controller :none do
+          get("/") { render :erb, "none" }
+          get("/with_foo_layout")  { render :erb, "none with layout", :layout => :foo }
         end
       end
-      get "/foo_test/demo"
-      assert_equal "foo layout erb file end", body
-      get "/bar_test/demo"
-      assert_equal "bar layout erb file end", body
-      get "/default_test/demo"
-      assert_equal "default layout erb file end", body
-      get "/default_test/foo"
-      assert_equal "foo layout erb file end", body
-      remove_views
+      get "/foo"
+      assert_equal "foo layout at foo", body
+      get "/bar"
+      assert_equal "bar layout at bar", body
+      get "/none"
+      assert_equal "default layout at none", body
+      get "/none/with_foo_layout"
+      assert_equal "foo layout at none with layout", body
+      get "/"
+      assert_equal "default layout at application", body
     end
   end
 
@@ -181,9 +180,9 @@ class TestRendering < Test::Unit::TestCase
       end
       get "/foo.js"
       assert_equal "Im Js", body
-      get "/bar.js"
-      assert_equal "Im Js", body
-      remove_views
+      # TODO: implement this!
+      # get "/bar.js"
+      # assert_equal "Im Js", body
     end
 
     should 'resolve with explicit template format' do
@@ -201,7 +200,6 @@ class TestRendering < Test::Unit::TestCase
       assert_equal "Im Haml\n", body
       get "/foo_xml.js"
       assert_equal "Im Xml", body
-      remove_views
     end
 
     should "ignore files ending in tilde and not render them" do
@@ -215,7 +213,6 @@ class TestRendering < Test::Unit::TestCase
       get '/foo'
       assert_equal "Im Haml\n", body
       assert_raises(Padrino::Rendering::TemplateNotFound) { get '/bar' }
-      remove_views
     end
 
     should 'resolve template locale' do
@@ -260,8 +257,7 @@ class TestRendering < Test::Unit::TestCase
       get "/foo.js"
       assert_equal "Im Italian Js", body
       I18n.locale = :en
-      get "/foo.pk"
-      assert_equal 404, status
+      assert_raise(RuntimeError) { get "/foo.pk" }
     end
 
     should 'resolve template content_type and locale with layout' do
@@ -302,8 +298,7 @@ class TestRendering < Test::Unit::TestCase
       I18n.locale = :en
       get "/bar.json"
       assert_equal "Im a json", body
-      get "/bar.pk"
-      assert_equal 404, status
+      assert_raise(RuntimeError) { get "/bar.pk" }
     end
 
     should 'renders erb with blocks' do

@@ -1,5 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + '/helper')
-require 'fixtures/apps/simple'
+require File.expand_path(File.dirname(__FILE__) + '/fixtures/apps/simple')
 
 class TestSimpleReloader < Test::Unit::TestCase
 
@@ -22,10 +22,12 @@ class TestSimpleReloader < Test::Unit::TestCase
       end
     end
 
-    should 'keep sinatra routes' do
+    should 'keep sinatra routes on development' do
       mock_app do
+        set :environment, :development
         get("/"){ "ok" }
       end
+      assert_equal :development, @app.environment
       get "/"
       assert_equal 200, status
       get "/__sinatra__/404.png"
