@@ -32,8 +32,8 @@ module Padrino
           say "showing list of plugins:", :yellow
           exit
         end
-        self.destination_root, plugin_path = resolve_template_paths(:plugin, plugin_file)
-        apply(plugin_path)
+        self.destination_root = options[:root]
+        apply resolve_template_paths(:plugin, plugin_file)
       end
     end # Plugins
   end # Generators
