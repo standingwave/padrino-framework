@@ -1,6 +1,8 @@
 require 'usher' unless defined?(Usher)
 require 'padrino-core/support_lite' unless String.method_defined?(:blank!)
 
+Usher::Route.class_eval { attr_accessor :custom_conditions, :before_filters, :after_filters, :use_layout }
+
 module Padrino
   ##
   # Padrino provides advanced routing definition support to make routes and url generation much easier.
@@ -19,24 +21,6 @@ module Padrino
 
     def self.included(base)
       base.extend Padrino::Routing::ClassMethods
-    end
-
-    ##
-    # Compatibility with usher
-    #
-    def route!(base=self.class, pass_block=nil)
-      # Usher
-      if self.class.router and match = self.class.router.recognize(@request, @request.path_info)
-        @block_params = match.params.map { |p| p.last }
-        @params = @params ? @params.merge(match.params_as_hash) : match.params_as_hash
-        pass_block = catch(:pass) do
-          route_eval(&match.destination)
-        end
-      elsif base.superclass.respond_to?(:routes)
-        route! base.superclass
-      else
-        route_missing
-      end
     end
 
     ##
@@ -72,7 +56,7 @@ module Padrino
     #
     # ==== Examples
     #
-    #   get :index, :respond_to => :any do
+    #   get :index, :provides => :any do
     #     case content_type
     #       when :js    then ...
     #       when :json  then ...
@@ -89,9 +73,48 @@ module Padrino
     #
     def static!
       if path = static_file?(request.path_info)
+        env['sinatra.static_file'] = path
         send_file(path, :disposition => nil)
       end
     end
+
+    private
+      ##
+      # Compatibility with usher
+      #
+      def route!(base=self.class, pass_block=nil)
+        if base.router and match = base.router.recognize(@request, @request.path_info)
+          @block_params = match.params.map { |p| p.last }
+          @params = @params ? @params.merge(match.params_as_hash) : match.params_as_hash
+          pass_block = catch(:pass) do
+            # Run Sinatra Conditions
+            match.path.route.custom_conditions.each { |cond| throw :pass if instance_eval(&cond) == false }
+            # Run scoped before filters
+            match.path.route.before_filters.each { |bef| throw :pass if instance_eval(&bef) == false }
+            # If present set current controller layout
+            parent_layout = base.instance_variable_get(:@layout)
+            base.instance_variable_set(:@layout, match.path.route.use_layout) if match.path.route.use_layout
+            # Now we can eval route, but because we have "throw halt" we need to be
+            # (en)sure to reset old layout and run controller after filters.
+            begin
+              route_eval(&match.destination)
+            ensure
+              base.instance_variable_set(:@layout, parent_layout) if match.path.route.use_layout
+              match.path.route.after_filters.each { |aft| throw :pass if instance_eval(&aft) == false }
+            end
+          end
+        end
+
+        # Run routes defined in superclass.
+        if base.superclass.respond_to?(:router)
+          route! base.superclass, pass_block
+          return
+        end
+
+        route_eval(&pass_block) if pass_block
+
+        route_missing
+      end
 
     module ClassMethods
       ##
@@ -120,21 +143,45 @@ module Padrino
       #     get :index, :map => "/:lang" do; ...; end
       #   end
       #
-      # And you can call directly these urls:
+      # and you can call directly these urls:
       #
       #   # => "/admin"
       #   # => "/admin/show/1"
       #
-      def controller(*extensions, &block)
+      # In a controller before and after filters are scoped and didn't affect other controllers or main app.
+      # In a controller layout are scoped and didn't affect others controllers and main app.
+      #
+      #   controller :posts do
+      #     layout :post
+      #     before { foo }
+      #     after  { bar }
+      #   end
+      #
+      def controller(*args, &block)
         if block_given?
-          options = extensions.extract_options!
-          @_controller, original_controller = extensions, @_controller
+          options = args.extract_options!
+
+          # Controller defaults
+          @_controller, original_controller = args, @_controller
           @_parents,    original_parent     = options.delete(:parent), @_parents
           @_defaults,   original_defaults   = options, @_defaults
+
+          # Application defaults
+          @before_filters, original_before_filters = [],  @before_filters
+          @after_filters,  original_after_filters  = [],  @after_filters
+          @layout,         original_layout         = nil, @layout
+
           instance_eval(&block)
+
+          # Application defaults
+          @before_filters = original_before_filters
+          @after_filters  = original_after_filters
+          @layout         = original_layout
+
+          # Controller defaults
           @_controller, @_parents, @_defaults = original_controller, original_parent, original_defaults
         else
-          include(*extensions) if extensions.any?
+          include(*args) if extensions.any?
         end
       end
       alias :controllers :controller
@@ -180,22 +227,6 @@ module Padrino
       end
       alias :url_for :url
 
-      ##
-      # Returns the cached route for the given path and options.
-      #
-      def fetch_route(path, options)
-        key = [path, options, @_controller, @_parents]
-        (@_cached_route ||= {})[key]
-      end
-
-      ###
-      # Caches the given route
-      #
-      def cache_route!(original, parsed)
-        key = original.push(@_controller, @_parents)
-        (@_cached_route ||= {})[key] = parsed if parsed
-      end
-
       private
         ##
         # Rewrite default because now routes can be:
@@ -210,16 +241,16 @@ module Padrino
         #   get :show, :with => :id, :parent => :user     # => "/user/:user_id/show/:id"
         #   get :show, :with => :id                       # => "/show/:id"
         #   get :show, :with => [:id, :name]              # => "/show/:id/:name"
-        #   get :list, :respond_to => :js                 # => "/list.{:format,js)"
-        #   get :list, :respond_to => :any                # => "/list(.:format)"
-        #   get :list, :respond_to => [:js, :json]        # => "/list.{!format,js|json}"
-        #   get :list, :respond_to => [:html, :js, :json] # => "/list(.{!format,js|json})"
+        #   get :list, :provides => :js                 # => "/list.{:format,js)"
+        #   get :list, :provides => :any                # => "/list(.:format)"
+        #   get :list, :provides => [:js, :json]        # => "/list.{!format,js|json}"
+        #   get :list, :provides => [:html, :js, :json] # => "/list(.{!format,js|json})"
         #
         def route(verb, path, options={}, &block)
           # Do padrino parsing. We dup options so we can build HEAD request correctly
           path, name, options = *parse_route(path, options.dup)
 
-          # Standard Sinatra requirements
+          # Usher Conditions
           options[:conditions] ||= {}
           options[:conditions][:request_method] = verb
           options[:conditions][:host] = options.delete(:host) if options.key?(:host)
@@ -231,23 +262,42 @@ module Padrino
           define_method "#{verb} #{path}", &block
           unbound_method = instance_method("#{verb} #{path}")
           block =
-          if block.arity != 0
-            proc { unbound_method.bind(self).call(*@block_params) }
-          else
-            proc { unbound_method.bind(self).call }
-          end
-
+            if block.arity != 0
+              proc { unbound_method.bind(self).call(*@block_params) }
+            else
+              proc { unbound_method.bind(self).call }
+            end
           invoke_hook(:route_added, verb, path, block)
+
+          # Usher route
           route = router.add_route(path, options).to(block)
           route.name(name) if name
+
+          # Add Sinatra conditions
+          options.each { |option, args| send(option, *args) }
+          conditions, @conditions = @conditions, []
+          route.custom_conditions = conditions
+
+          # Add Application defaults
+          if @_controller
+            route.before_filters = @before_filters
+            route.after_filters  = @after_filters
+            route.use_layout     = @layout
+          else
+            route.before_filters = []
+            route.after_filters  = []
+          end
+
           route
         end
 
+        ##
+        # Returns the final parsed route details (modified to reflect all Padrino options)
+        # given the raw route. Raw route passed in could be a named alias or a string and
+        # is parsed to reflect provides formats, controllers, parents, 'with' parameters,
+        # and other options.
+        #
         def parse_route(path, options)
-          # We check and return the cached route if present
-          cache = fetch_route(path, options)
-          return cache if cache
-
           # We need save our originals path/options so we can perform correctly cache.
           original = [path, options.dup]
 
@@ -265,9 +315,12 @@ module Padrino
               path = process_path_for_with_params(path, with_params)
             end
 
-            # Now we need to parse our respond_to
-            if format_params = options.delete(:respond_to)
-              path = process_path_for_respond_to(path, format_params)
+            # Now we need to parse our provides with :respond_to backward compatibility
+            options[:provides] ||= options.delete(:respond_to)
+            options.delete(:provides) if options[:provides].nil?
+
+            if format_params = options[:provides]
+              path = process_path_for_provides(path, format_params)
             end
 
             # Build our controller
@@ -292,9 +345,8 @@ module Padrino
               path = process_path_for_parent_params(path, parent_params)
             end
 
-            # Little reformats
-            path.sub!(%r^/index(\(.\{:format[\,\w\$\|]*\}\))$^, '\1') # Remove index from formatted routes
-            path.sub!(%r{\bindex(.*)$}, '\1')                         # If the route contains /index we remove that
+            # Small reformats
+            path.gsub!(/\/?index\/?/, '')                             # Remove index
             path = (uri_root == "/" ? "/" : "(/)") if path.blank?     # Add a trailing delimiter if path is empty
 
             # We need to have a path that start with / in some circumstances and that don't end with /
@@ -303,18 +355,13 @@ module Padrino
               path.sub!(%r{/$}, '')
             end
 
-            # We need to fix some differences between usher and sintra router
+            # We need to fix a few differences between the usher and sintra router
             path.sub!(%r{/\?$}, '(/)') #  '/foo/?' => '/foo(/)'
           end
 
           # Merge in option defaults
           options.reverse_merge!(:default_values => @_defaults)
 
-          # Save parsed
-          parsed = [path, name, options.dup]
-
-          # Perform caching
-          cache_route!(original, parsed) unless reload?
           [path, name, options]
         end
 
@@ -339,18 +386,32 @@ module Padrino
         # Processes the existing path and appends the 'format' suffix onto the route
         # Used for calculating path in route method
         #
-        def process_path_for_respond_to(path, format_params)
-          format_suffix = case format_params
-            when :any  then "(.:format)"
-            when Array then
-              formats   = format_params.dup # Prevent changes to HEAD verb
-              container = formats.delete(:html) ? "(%s)" : "%s"
-              match     = ".{:format," + formats.collect { |f| "#{f}$" }.join("|") + "}"
-              container % match
-            else ".{:format,#{format_params}}"
-          end
-          path + format_suffix
+        def process_path_for_provides(path, format_params)
+          path + "(.:format)"
         end
+
+        ##
+        # Allow paths for the given request head or request format
+        #
+        def provides(*types)
+          mime_types = types.map{ |t| mime_type(t) }
+
+          condition {
+            matching_types = (request.accept & mime_types)
+            request.path_info =~ /\.([^\.\/]+)$/
+            format = ($1 || :html).to_sym
+            match_format = types.include?(format) || types.include?(:any)
+            @_content_type =
+              if mime_type = matching_types.first
+                Rack::Mime::MIME_TYPES.find { |k, v| v == matching_types.first }[0].sub(/\./,'').to_sym
+              else
+                format
+              end
+            content_type(@_content_type, :charset => 'utf-8')
+            match_format || !matching_types.empty?
+          }
+        end
+        alias :respond_to :provides
     end # ClassMethods
   end # Routing
 end # Padrino

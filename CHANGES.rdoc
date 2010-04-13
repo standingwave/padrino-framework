@@ -2,8 +2,16 @@
 
 == 0.9.10 (Unreleased)
 
-* Performance Tuning: Cached templates
-* Performance Tuning: Cached routes
+* Performance tuning: Caching layout template
+* Fixed a bug with layouts that prevent double rendering
+* Added Scoped filters
+* Added Scoped layout
+* Our routing system now with :provides or :respond_to (other than route format) match "request.accept"
+* Our routes now accepts Sinatra 1.0 conditions
+* Routing refactoring
+* Now mounter use the our new Router instead of Rack::Builder
+* Added a new router class that handle in a easy why domains
+* Performance Tuning: Caching templates
 * Danish translation [Thanks to Molte]
 * Russian translation [Thanks to Imm]
 * Added +extcore+ as a javascript option in project generator [Thanks to Imm]
@@ -19,8 +27,10 @@
 * Includes template generation support for a project.
 * Fixes SASS reload plugin issue on 1.9.X.
 * Fixes an issue with generator not casing controller / model names
+* Fixes issue with mounter and locating the app file
 * Added sequel support for padrino-admin [Thanks to Aemadrid]
 * Added basic sequel migration tasks [Thanks to Aemadrid]
+* Mailer now supports setting template path to render explicitly
 
 == 0.9.9
 
