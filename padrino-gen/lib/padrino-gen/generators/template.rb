@@ -20,7 +20,7 @@ module Padrino
       desc "Description:\n\n\tpadrino-gen template generates a Padrino project from a template"
 
       argument :project_name, :desc => "The name of your padrino project"
-      argument :template_path, :desc => "The location of the template file"
+      argument :template_file, :desc => "The location of the template file"
 
       class_option :root, :desc => "The root destination", :aliases => '-r', :default => ".",   :type => :string
 
@@ -29,13 +29,8 @@ module Padrino
 
       # Create the Padrino Template
       def setup_template
-        self.destination_root = File.join(options[:root], project_name)
-        path = template_path =~ %r{^http://} ? template_path : File.expand_path(template_path)
-        if template_path =~ /gist/ && template_path !~ /raw/
-          raw_link = open(template_path).read.scan(/<a\s+href\s?\=\"(.*?)\"\>raw/)[0][0] rescue nil
-          path = "http://gist.github.com#{raw_link}" if raw_link
-        end
-        apply(path)
+        self.destination_root, template_path = resolve_template_paths(project_name, template_file)
+        apply(template_path)
       end
     end # Templates
   end # Generators

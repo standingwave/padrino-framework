@@ -1,5 +1,4 @@
 require File.expand_path(File.dirname(__FILE__) + '/helper')
-require 'thor/group'
 
 class TestTemplateGenerator < Test::Unit::TestCase
   def setup
@@ -13,7 +12,6 @@ class TestTemplateGenerator < Test::Unit::TestCase
     end
 
     should "generate correctly a project with templates" do
-
       # Allow template generator to generate project scaffold
       assert_file_exists('/tmp/sample_project')
       assert_file_exists('/tmp/sample_project/app')
@@ -55,6 +53,47 @@ class TestTemplateGenerator < Test::Unit::TestCase
       assert_file_exists('/tmp/sample_project/testapp/app.rb')
       assert_file_exists('/tmp/sample_project/testapp/controllers')
       assert_file_exists('/tmp/sample_project/testapp/controllers/users.rb')
+    end
+  end
+
+  context "with template generator resolving urls" do
+    setup do
+      @template_gen = Padrino::Generators::Template.dup
+      @template_gen.any_instance.stubs(:apply).with(nil)
+    end
+
+    should "resolve generic url properly" do
+      template_file = 'http://www.example.com/test.rb'
+      @template_gen.any_instance.expects(:apply).with(template_file).returns(true).once
+      @template_gen.start([ 'sample_project', template_file, '-r=/tmp'])
+    end
+
+    should "resolve gist url properly" do
+      FakeWeb.register_uri(:get, "http://gist.github.com/357045", :body => '<a href="/raw/357045/4356/blog_template.rb">raw</a>')
+      template_file = 'http://gist.github.com/357045'
+      resolved_path = 'http://gist.github.com/raw/357045/4356/blog_template.rb'
+      @template_gen.any_instance.expects(:apply).with(resolved_path).returns(true).once
+      @template_gen.start([ 'sample_project', template_file, '-r=/tmp'])
+    end
+
+    should "resolve official plugin" do
+      template_file = 'hoptoad'
+      resolved_path = "http://github.com/padrino/padrino-recipes/raw/master/plugins/hoptoad_plugin.rb"
+      @template_gen.any_instance.expects(:apply).with(resolved_path).returns(true).once
+      @template_gen.start([ 'plugin', template_file, '-r=/tmp'])
+    end
+
+    should "resolve official template" do
+      template_file = 'sampleblog'
+      resolved_path = "http://github.com/padrino/padrino-recipes/raw/master/templates/sampleblog_template.rb"
+      @template_gen.any_instance.expects(:apply).with(resolved_path).returns(true).once
+      @template_gen.start([ 'sample_project', template_file, '-r=/tmp'])
+    end
+
+    should "resolve local file" do
+      template_file = 'path/to/local/file.rb'
+      @template_gen.any_instance.expects(:apply).with(File.expand_path(template_file)).returns(true).once
+      @template_gen.start([ 'sample_project', template_file, '-r=/tmp'])
     end
   end
 
