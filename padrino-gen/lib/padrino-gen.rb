@@ -56,6 +56,7 @@ module Padrino
       def load_components!
         require 'padrino-gen/generators/actions'
         require 'padrino-gen/generators/components/actions'
+        require 'padrino-gen/generators/runner'
         # Require all generator components
         Dir[File.dirname(__FILE__) + '/padrino-gen/generators/components/**/*.rb'].each { |file| require file }
         load_paths.flatten.each { |file| require file  }

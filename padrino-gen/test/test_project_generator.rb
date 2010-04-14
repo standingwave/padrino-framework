@@ -1,5 +1,4 @@
 require File.expand_path(File.dirname(__FILE__) + '/helper')
-require 'thor/group'
 require 'fakeweb'
 
 class TestProjectGenerator < Test::Unit::TestCase

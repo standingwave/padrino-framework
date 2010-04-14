@@ -1,8 +1,8 @@
 require 'rubygems'
+require 'rack/test'
 require 'test/unit'
 require 'shoulda'
 require 'mocha'
-require 'rack/test'
 require 'webrat'
 require 'thor/group'
 

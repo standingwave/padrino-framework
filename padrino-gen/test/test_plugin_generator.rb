@@ -1,17 +1,17 @@
 require File.expand_path(File.dirname(__FILE__) + '/helper')
 
-class TestTemplateGenerator < Test::Unit::TestCase
+class TestPluginGenerator < Test::Unit::TestCase
   def setup
     %w(sample_project sample_git sample_rake sample_admin).each { |proj| system("rm -rf /tmp/#{proj}") }
   end
 
-  context 'the template generator' do
+  context 'the project generator with template' do
     setup do
       example_template_path = File.join(File.dirname(__FILE__), 'fixtures', 'example_template.rb')
-      Padrino.bin_gen('template', 'sample_project', example_template_path, '-r=/tmp', '> /dev/null')
+      Padrino.bin_gen(:project, 'sample_project', "-p=#{example_template_path}", '-r=/tmp', '> /dev/null')
     end
 
-    should "generate correctly a project with templates" do
+    should "generate correctly a project given a template" do
       # Allow template generator to generate project scaffold
       assert_file_exists('/tmp/sample_project')
       assert_file_exists('/tmp/sample_project/app')
@@ -56,51 +56,56 @@ class TestTemplateGenerator < Test::Unit::TestCase
     end
   end
 
-  context "with template generator resolving urls" do
+  context "with resolving urls" do
     setup do
-      @template_gen = Padrino::Generators::Template.dup
-      @template_gen.any_instance.stubs(:apply).with(nil)
+      @project_class = Padrino::Generators::Project.dup
     end
 
     should "resolve generic url properly" do
       template_file = 'http://www.example.com/test.rb'
-      @template_gen.any_instance.expects(:apply).with(template_file).returns(true).once
-      @template_gen.start([ 'sample_project', template_file, '-r=/tmp'])
+      project_gen = @project_class.new(['sample_project'], ["-p=#{template_file}", '-r=/tmp'], {})
+      project_gen.expects(:apply).with(template_file).returns(true).once
+      project_gen.invoke
     end
-
+    
     should "resolve gist url properly" do
       FakeWeb.register_uri(:get, "http://gist.github.com/357045", :body => '<a href="/raw/357045/4356/blog_template.rb">raw</a>')
       template_file = 'http://gist.github.com/357045'
       resolved_path = 'http://gist.github.com/raw/357045/4356/blog_template.rb'
-      @template_gen.any_instance.expects(:apply).with(resolved_path).returns(true).once
-      @template_gen.start([ 'sample_project', template_file, '-r=/tmp'])
-    end
-
-    should "resolve official plugin" do
-      template_file = 'hoptoad'
-      resolved_path = "http://github.com/padrino/padrino-recipes/raw/master/plugins/hoptoad_plugin.rb"
-      @template_gen.any_instance.expects(:apply).with(resolved_path).returns(true).once
-      @template_gen.start([ 'plugin', template_file, '-r=/tmp'])
+      project_gen = @project_class.new(['sample_project'], ["-p=#{template_file}", '-r=/tmp'], {})
+      project_gen.expects(:apply).with(resolved_path).returns(true).once
+      project_gen.invoke
     end
 
     should "resolve official template" do
       template_file = 'sampleblog'
       resolved_path = "http://github.com/padrino/padrino-recipes/raw/master/templates/sampleblog_template.rb"
-      @template_gen.any_instance.expects(:apply).with(resolved_path).returns(true).once
-      @template_gen.start([ 'sample_project', template_file, '-r=/tmp'])
+      project_gen = @project_class.new(['sample_project'], ["-p=#{template_file}", '-r=/tmp'], {})
+      project_gen.expects(:apply).with(resolved_path).returns(true).once
+      project_gen.invoke
     end
 
     should "resolve local file" do
       template_file = 'path/to/local/file.rb'
-      @template_gen.any_instance.expects(:apply).with(File.expand_path(template_file)).returns(true).once
-      @template_gen.start([ 'sample_project', template_file, '-r=/tmp'])
+      project_gen = @project_class.new(['sample_project'], ["-p=#{template_file}", '-r=/tmp'], {})
+      project_gen.expects(:apply).with(File.expand_path(template_file)).returns(true).once
+      project_gen.invoke
+    end
+    
+    should "resolve official plugin" do
+      template_file = 'hoptoad'
+      resolved_path = "http://github.com/padrino/padrino-recipes/raw/master/plugins/hoptoad_plugin.rb"
+      plugin_gen = Padrino::Generators::Plugin.dup
+      plugin_gen.any_instance.expects(:apply).with(nil)
+      plugin_gen.any_instance.expects(:apply).with(resolved_path).returns(true).once
+      plugin_gen.start([ template_file, '-r=/tmp'])
     end
   end
 
   context "with git commands" do
     setup do
       git_template_path = File.join(File.dirname(__FILE__), 'fixtures', 'git_template.rb')
-      Padrino.bin_gen('template', 'sample_git', git_template_path, '-r=/tmp', '> /dev/null')
+      Padrino.bin_gen('project', 'sample_git', "-p=#{git_template_path}", '-r=/tmp', '> /dev/null')
     end
 
     should "generate correctly a repository" do
@@ -114,10 +119,10 @@ class TestTemplateGenerator < Test::Unit::TestCase
     end
   end
 
-  context "with rake method" do
+  context "with rake invocations" do
     setup do
       rake_template_path = File.join(File.dirname(__FILE__), 'fixtures', 'rake_template.rb')
-      Padrino.bin_gen('template', 'sample_rake', rake_template_path, '-r=/tmp', '> /dev/null')
+      Padrino.bin_gen('project', 'sample_rake', "-p=#{rake_template_path}", '-r=/tmp', '> /dev/null')
     end
 
     should "Run rake task and list tasks" do
@@ -128,7 +133,7 @@ class TestTemplateGenerator < Test::Unit::TestCase
   context "with admin commands" do
     setup do
       admin_template_path = File.join(File.dirname(__FILE__), 'fixtures', 'admin_template.rb')
-      Padrino.bin_gen('template', 'sample_admin', admin_template_path, '-r=/tmp', '> /dev/null')
+      Padrino.bin_gen('project', 'sample_admin', "-p=#{admin_template_path}", '-r=/tmp', '> /dev/null')
     end
 
     should "generate correctly an admin" do

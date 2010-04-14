@@ -64,26 +64,26 @@ module Padrino
 
       private
 
-      # Resolves the project_root and the template_path
+      # Resolves the path to the plugin template
       # given the project_name and the template_file
-      # resolve_template_paths('sample_blog', 'path/to/local/file')
-      # resolve_template_paths('plugin', 'hoptoad')
-      # resolve_template_paths('sample_blog', 'sampleblog')
-      # resolve_template_paths('sample_blog', 'http://gist.github.com/357045')
-      def resolve_template_paths(type, template_file)
+      # execute_runner(:plugin, 'path/to/local/file')
+      # execute_runner(:plugin, 'hoptoad')
+      # execute_runner(:template, 'sampleblog')
+      # execute_runner(:template, 'http://gist.github.com/357045')
+      def execute_runner(kind, template_file)
         # Determine resolved template path
-        case
+        template_path = case
         when template_file =~ %r{^http://} && template_file !~ /gist/
           template_file
         when template_file =~ /gist/ && template_file !~ /raw/
           raw_link = open(template_file).read.scan(/<a\s+href\s?\=\"(.*?)\"\>raw/)
           raw_link ? "http://gist.github.com#{raw_link}" : template_file
         when File.extname(template_file).blank? # referencing official plugin (i.e hoptoad)
-          kind = type.to_s
-          "http://github.com/padrino/padrino-recipes/raw/master/#{kind.pluralize}/#{template_file}_#{kind}.rb"
+          "http://github.com/padrino/padrino-recipes/raw/master/#{kind.to_s.pluralize}/#{template_file}_#{kind}.rb"
         else # local file on system
           File.expand_path(template_file)
         end
+        self.apply(template_path)
       end
     end # Runner
   end # Generators

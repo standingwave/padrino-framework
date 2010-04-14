@@ -1,4 +1,3 @@
-require File.expand_path(File.dirname(__FILE__) + "/runner") # FIXME: this must be require 'runner'
 require 'padrino-core/version'
 
 module Padrino
@@ -22,7 +21,7 @@ module Padrino
 
       argument :name, :desc => "The name of your padrino project"
 
-      class_option :template,     :desc => "run padrino template", :aliases => '-p', :default => nil,   :type => :string
+      class_option :template,     :desc => "Run padrino template", :aliases => '-p', :default => nil,   :type => :string
       class_option :run_bundle,   :desc => "Run bundle install",   :aliases => '-b', :default => false, :type => :boolean
       class_option :root,         :desc => "The root destination", :aliases => '-r', :default => ".",   :type => :string
       class_option :dev,          :desc => "Use padrino from a git checkout",        :default => false, :type => :boolean
@@ -41,19 +40,20 @@ module Padrino
       # Copies over the Padrino base application App
       def setup_project
         self.destination_root = File.join(options[:root], name)
-        if options[:template] # Run the template and exit
-          apply resolve_template_paths(:template, options[:template])
-          exit
-        end
         @class_name = name.gsub(/\W/, "_").underscore.classify
-        directory("project/", destination_root)
-        directory("app/", destination_root("app/"))
-        store_component_config('.components')
-        template "templates/Gemfile.tt", destination_root("Gemfile")
+        if options[:template] # Run the template to create project
+          execute_runner(:template, options[:template])
+        else # generate project without template
+          directory("project/", destination_root)
+          directory("app/", destination_root("app/"))
+          store_component_config('.components')
+          template "templates/Gemfile.tt", destination_root("Gemfile")
+        end
       end
 
       # For each component, retrieve a valid choice and then execute the associated generator
       def setup_components
+        return if options[:template]
         self.class.component_types.each do |comp|
           choice = resolve_valid_choice(comp)
           execute_component_setup(comp, choice)
