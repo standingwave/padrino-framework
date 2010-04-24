@@ -13,7 +13,8 @@ class TestPadrinoMailer < Test::Unit::TestCase
     }
     
     should "be able to deliver inline emails using the email helper" do
-      assert_email_sent(:to => 'john@apple.com', :body => 'Test Body', :from => 'joe@smith.com', :via => :sendmail, :subject => 'Test Email')
+      assert_email_sent(:to => 'john@apple.com', :from => 'joe@smith.com', :via => :smtp, 
+                        :subject => 'Test Email', :body => 'Test Body')
       visit '/deliver/inline', :post
       assert_equal 'mail delivered', last_response.body
     end

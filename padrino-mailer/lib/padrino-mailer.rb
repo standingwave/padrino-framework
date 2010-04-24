@@ -34,7 +34,8 @@ module Padrino
       #         :subject => "Welcome to Awesomeness!", :body => haml(:some_template)
       #
       def email(mail_attributes)
-        Padrino::Mailer::MailObject.new(mail_attributes).deliver
+        smtp_settings = Padrino::Mailer::Base.smtp_settings
+        Padrino::Mailer::MailObject.new(mail_attributes, smtp_settings).deliver
       end
     end
   end # Mailer

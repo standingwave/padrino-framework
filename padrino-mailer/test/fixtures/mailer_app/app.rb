@@ -44,7 +44,7 @@ class MailerDemo < Sinatra::Base
   end
   
   post "/deliver/inline" do
-    result = email(:to => "john@apple.com", :from => "joe@smith.com", :subject => "Test Email", :body => "Test Body", :via => :sendmail)
+    result = email(:to => "john@apple.com", :from => "joe@smith.com", :subject => "Test Email", :body => "Test Body", :via => :smtp)
     result ? "mail delivered" : 'mail not delivered'
   end
 
