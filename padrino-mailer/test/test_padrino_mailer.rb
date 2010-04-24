@@ -11,6 +11,12 @@ class TestPadrinoMailer < Test::Unit::TestCase
       Padrino::Mailer::Base::views_path << MailerDemo.views
       MailerDemo::SampleMailer.smtp_settings = MailerDemo.smtp_settings
     }
+    
+    should "be able to deliver inline emails using the email helper" do
+      assert_email_sent(:to => 'john@apple.com', :body => 'Test Body', :from => 'joe@smith.com', :via => :sendmail, :subject => 'Test Email')
+      visit '/deliver/inline', :post
+      assert_equal 'mail delivered', last_response.body
+    end
 
     should 'be able to deliver plain text emails' do
       assert_email_sent(:to => 'john@fake.com', :from => 'noreply@birthday.com', :via => :smtp,
@@ -35,11 +41,4 @@ class TestPadrinoMailer < Test::Unit::TestCase
       assert_equal 'mail delivered', last_response.body
     end
   end
-
-  protected
-
-    def assert_email_sent(mail_attributes)
-      delivery_attributes = mail_attributes.merge(:smtp => MailerDemo.smtp_settings)
-      Padrino::Mailer::MailObject.any_instance.expects(:send_mail).with(delivery_attributes).once.returns(true)
-    end
 end

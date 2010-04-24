@@ -50,11 +50,11 @@ module Padrino
           %w(sendmail smtp)
         end
 
-        def transport(tmail)
+        def transport(mail)
           if File.executable? sendmail_binary
-            transport_via_sendmail(tmail)
+            transport_via_sendmail(mail)
           else
-            transport_via_smtp(tmail)
+            transport_via_smtp(mail)
           end
         end
 

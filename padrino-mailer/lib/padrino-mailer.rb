@@ -21,6 +21,7 @@ module Padrino
     #
     def self.registered(app)
       Padrino::Mailer::Base::views_path << app.views
+      app.helpers Padrino::Mailer::Helpers
     end
   end # Mailer
 end # Padrino
