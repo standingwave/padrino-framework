@@ -35,6 +35,22 @@ module Padrino
       end
 
       ##
+      # Defines an alternate dsl syntax for defining a message within a mailer class
+      #
+      # ==== Examples
+      #
+      #   message :birthday do |name, age|
+      #     subject "Happy Birthday!"
+      #     to   'john@fake.com'
+      #     from 'noreply@birthday.com'
+      #     body 'name' => name, 'age' => age
+      #   end
+      #
+      def self.message(name, &block)
+        define_method(name, &block)
+      end
+
+      ##
       # Defines a method allowing mail attributes to be set into a hash for use when delivering
       #
       self.mail_fields.each do |field|
@@ -92,11 +108,11 @@ module Padrino
 
       private
 
-        # Returns the glob pattern of the template file to locate and render
-        def template_pattern
-          @_pattern ||= (@mail_attributes[:template].present? ? "#{@mail_attributes[:template]}.*" :
-                         File.join(self.class.name.underscore.split("/").last, "#{@mail_name}.*"))
-        end
+      # Returns the glob pattern of the template file to locate and render
+      def template_pattern
+        @_pattern ||= (@mail_attributes[:template].present? ? "#{@mail_attributes[:template]}.*" :
+                       File.join(self.class.name.underscore.split("/").last, "#{@mail_name}.*"))
+      end
     end # Base
   end # Mailer
 end # Padrino
