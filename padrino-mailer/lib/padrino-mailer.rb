@@ -34,7 +34,7 @@ module Padrino
       #
       def email(mail_attributes)
         smtp_settings = Padrino::Mailer::Base.smtp_settings
-        Padrino::Mailer::MailObject.new(mail_attributes, smtp_settings).deliver
+        Padrino::Mailer::Email.new(mail_attributes, smtp_settings).deliver
       end
 
       ##

@@ -27,7 +27,7 @@ module Padrino
       @@views_path = []
       cattr_accessor :smtp_settings
       cattr_accessor :views_path
-      attr_accessor :mail_attributes
+      attr_accessor  :mail_attributes
 
       def initialize(mail_name=nil) #:nodoc:
         @mail_name = mail_name
@@ -86,9 +86,9 @@ module Padrino
       #   SampleMailer.deliver(:birthday_message)
       #
       def self.deliver(mail_name, *args)
-        mail_object = self.new(mail_name)
-        mail_object.method(mail_name).call(*args)
-        MailObject.new(mail_object.mail_attributes, self.smtp_settings).deliver
+        email = self.new(mail_name)
+        email.method(mail_name).call(*args)
+        Email.new(email.mail_attributes, self.smtp_settings).deliver
       end
 
       ##
@@ -107,12 +107,11 @@ module Padrino
       end
 
       private
-
-      # Returns the glob pattern of the template file to locate and render
-      def template_pattern
-        @_pattern ||= (@mail_attributes[:template].present? ? "#{@mail_attributes[:template]}.*" :
-                       File.join(self.class.name.underscore.split("/").last, "#{@mail_name}.*"))
-      end
+        # Returns the glob pattern of the template file to locate and render
+        def template_pattern
+          @_pattern ||= (@mail_attributes[:template].present? ? "#{@mail_attributes[:template]}.*" :
+                         File.join(self.class.name.underscore.split("/").last, "#{@mail_name}.*"))
+        end
     end # Base
   end # Mailer
 end # Padrino
