@@ -32,7 +32,7 @@ module Padrino
           check_app_existence(app)
           self.behavior = :revoke if options[:destroy]
           @app_name = fetch_app_name(app)
-          @short_name = name.to_s.gsub(/mailer/i, '').downcase.underscore
+          @short_name = name.to_s.gsub(/mailer/i, '').underscore.downcase
           @mailer_basename = "#{@short_name.underscore}_mailer"
           @mailer_klass    = "#{@short_name.camelize}Mailer"
           template "templates/mailer_initializer.rb.tt", destination_root("lib/mailer.rb"), :skip => true
