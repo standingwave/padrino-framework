@@ -40,7 +40,7 @@ class TestMailerBase < Test::Unit::TestCase
   context 'for retrieving template path' do
     should "return correct path" do
       demo_mailer = DemoMailer.new(:sample_mail)
-      assert_match %r{demo_mailer/sample_mail.erb}, demo_mailer.template_path
+      assert_match %r{mailers/demo/sample_mail.erb}, demo_mailer.template_path
     end
   end
 

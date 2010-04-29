@@ -61,10 +61,13 @@ module Padrino
       # Assigns the body key to the mail attributes either with the rendered body from a template or the given string value
       #
       def body(body_value)
-        final_template = template_path
-        raise "Template for '#{@mail_name}' could not be located in views path!" unless final_template
-        @mail_attributes[:body] = Tilt.new(final_template).render(self, body_value.symbolize_keys) if body_value.is_a?(Hash)
-        @mail_attributes[:body] = body_value if body_value.is_a?(String)
+        if body_value.is_a?(Hash) # body is locals hash to pass to the template
+          final_template = template_path
+          raise "Template for '#{@mail_name}' could not be located in views path!" unless final_template
+          @mail_attributes[:body] = Tilt.new(final_template).render(self, body_value.symbolize_keys)
+        else # body is a string to render
+          @mail_attributes[:body] = body_value if body_value.is_a?(String)
+        end
       end
 
       ##
@@ -75,6 +78,8 @@ module Padrino
           template = Dir[File.join(view_path, template_pattern)].first
           return template if template
         end
+        raise File.join(self.views_path.first, template_pattern)
+        return nil
       end
 
       ##
@@ -110,7 +115,12 @@ module Padrino
         # Returns the glob pattern of the template file to locate and render
         def template_pattern
           @_pattern ||= (@mail_attributes[:template].present? ? "#{@mail_attributes[:template]}.*" :
-                         File.join(self.class.name.underscore.split("/").last, "#{@mail_name}.*"))
+                         File.join('mailers', short_name, "#{@mail_name}.*"))
+        end
+        
+        # Returns the short name for a mailer (i.e UserNoticeMailer => user_notice)
+        def short_name
+          self.class.name.gsub(/mailer/i, '').underscore.split("/").last
         end
     end # Base
   end # Mailer

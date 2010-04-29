@@ -27,7 +27,7 @@ class TestPadrinoMailer < Test::Unit::TestCase
     end
 
     should 'be able to deliver emails with custom view' do
-      assert_email_sent(:template => 'sample_mailer/foo_message', :to => 'john@fake.com',
+      assert_email_sent(:template => 'mailers/sample/foo_message', :to => 'john@fake.com',
                         :from => 'noreply@custom.com', :via => :smtp,
                         :subject => "Welcome Message!", :body => "Hello to Bobby")
       visit '/deliver/custom', :post

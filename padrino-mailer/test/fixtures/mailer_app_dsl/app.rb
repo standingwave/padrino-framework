@@ -34,7 +34,7 @@ class MailerDemoDsl < Sinatra::Base
     end
 
     message :welcome do |name|
-      template 'sample_mailer/foo_message'
+      template 'mailers/sample/foo_message'
       subject "Welcome Message!"
       to   'john@fake.com'
       from 'noreply@custom.com'
