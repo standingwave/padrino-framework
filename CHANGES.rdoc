@@ -1,9 +1,41 @@
 = CHANGES
 
-== 0.9.10 (Unreleased)
+== 0.9.11 (Unreleased)
 
-* Performance Tuning: Cached templates
-* Performance Tuning: Cached routes
+* Moved bundler dependency from padrino-core to padrino-gen
+* Moved I18n dependency from padrino-core to padrino-helpers
+* Use 'mail' library and remove 'tmail' dependency for padrino-mailer
+* Add support for a quick 'email' helper for delivering mail in padrino-mailer
+* Allow default rendering options to be changed [Thanks to Skade]
+* Fix ensure to load database conf before everything
+* Prevent htm, html mismatch in content_type [Thanks to Skade]
+* Fixed issue with rake test tasks
+* Fixes an issue with trailing delimiters for index controller actions (i.e /posts/)
+* Fixes issue with sequel in admin gem
+
+== 0.9.10
+
+* Fixed DM Migration Issue with Text, Boolean etc... [Thanks to Snusnu and Akzhan]
+* Fixed Issue with deploying Padrino apps to a Sub-URI
+* Fixed padrino g and padrino gen aliases
+* Refactored padrino-gen internals
+* Colorized logs
+* Added support for 'rake routes' task
+* Disabled sessions by defaults as Sinatra do
+* Enable sessions for admin app since authentication require it
+* Don't load Rack::Logger if our log_level is not :debug
+* Set real values for app.public and app.static because due to frequently calls
+* Updated templates with new changes
+* Performance tuning: Caching layout template
+* Fixed a bug with layouts that prevent double rendering
+* Added Scoped filters
+* Added Scoped layout
+* Our routing system now with :provides or :respond_to (other than route format) match "request.accept"
+* Our routes now accepts Sinatra 1.0 conditions
+* Routing refactoring
+* Now mounter use the our new Router instead of Rack::Builder
+* Added a new router class that handle in a easy why domains
+* Performance Tuning: Caching templates
 * Danish translation [Thanks to Molte]
 * Russian translation [Thanks to Imm]
 * Added +extcore+ as a javascript option in project generator [Thanks to Imm]
@@ -18,8 +50,10 @@
 * Fixes support for index routes with params.
 * Fixes SASS reload plugin issue on 1.9.X.
 * Fixes an issue with generator not casing controller / model names
+* Fixes issue with mounter and locating the app file
 * Added sequel support for padrino-admin [Thanks to Aemadrid]
 * Added basic sequel migration tasks [Thanks to Aemadrid]
+* Mailer now supports setting template path to render explicitly
 
 == 0.9.9
 

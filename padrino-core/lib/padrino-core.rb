@@ -29,7 +29,7 @@ module Padrino
     # Helper method that return PADRINO_ENV
     #
     def env
-      PADRINO_ENV.to_s.downcase.to_sym
+      @_env ||= PADRINO_ENV.to_s.downcase.to_sym
     end
 
     ##
@@ -37,9 +37,9 @@ module Padrino
     #
     def application
       raise ApplicationLoadError.new("At least one app must be mounted!") unless self.mounted_apps && self.mounted_apps.any?
-      builder = Rack::Builder.new
-      self.mounted_apps.each { |app| app.map_onto(builder) }
-      builder
+      router = Padrino::Router.new
+      self.mounted_apps.each { |app| app.map_onto(router) }
+      router
     end
 
     ##

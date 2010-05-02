@@ -10,9 +10,8 @@ Dir[File.dirname(__FILE__) + '/padrino-mailer/**/*.rb'].each { |file| require fi
 
 module Padrino
   ##
-  # This component uses an enhanced version of the excellent pony library (vendored) for a powerful but simple mailer
-  # system within Padrino (and Sinatra).
-  # There is full support for using an html content type as well as for file attachments.
+  # This component uses the 'mail' library to create a powerful but simple mailer system within Padrino (and Sinatra).
+  # There is full support for using plain or html content types as well as for attaching files.
   # The MailerPlugin has many similarities to ActionMailer but is much lighterweight and (arguably) easier to use.
   #
   module Mailer
@@ -21,6 +20,22 @@ module Padrino
     #
     def self.registered(app)
       Padrino::Mailer::Base::views_path << app.views
+      app.helpers Padrino::Mailer::Helpers
+    end
+    
+    module Helpers
+      ##
+      # Delivers an email with the given mail attributes (to, from, subject, cc, bcc, body, et.al)
+      #
+      # ==== Examples
+      #
+      #   email :to => @user.email, :from => "awesomeness@example.com", 
+      #         :subject => "Welcome to Awesomeness!", :body => haml(:some_template)
+      #
+      def email(mail_attributes)
+        smtp_settings = Padrino::Mailer::Base.smtp_settings
+        Padrino::Mailer::MailObject.new(mail_attributes, smtp_settings).deliver
+      end
     end
   end # Mailer
 end # Padrino

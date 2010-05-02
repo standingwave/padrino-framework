@@ -17,6 +17,11 @@ module Padrino
       /~$/ # This is for Gedit
     ]
 
+    ##
+    # Default rendering options used in the #render-method
+    #
+    DEFAULT_RENDERING_OPTIONS = { :strict_format => false, :raise_exceptions => true }
+
     def self.registered(app)
       app.send(:include, Padrino::Rendering)
     end
@@ -37,7 +42,7 @@ module Padrino
       #
       def layout(name=:layout, &block)
         return super(name, &block) if block_given?
-        @_layout = name
+        @layout = name
       end
 
       ##
@@ -56,6 +61,17 @@ module Padrino
       #
       def cache_template_file!(template_file, render_options)
         (@_cached_templates ||= {})[render_options] = template_file || []
+      end
+
+      def fetch_layout_path
+        layout_name = @layout || :application
+        @_cached_layout ||= {}
+        cached_layout_path = @_cached_layout[layout_name]
+        return cached_layout_path if cached_layout_path
+        has_layout_at_root = Dir["#{views}/#{layout_name}.*"].any?
+        layout_path = has_layout_at_root ? layout_name.to_sym : File.join('layouts', layout_name.to_s).to_sym
+        @_cached_layout[layout_name] = layout_path unless reload_templates?
+        layout_path
       end
     end
 
@@ -82,16 +98,16 @@ module Padrino
         data, engine = *resolve_template(engine, options) if data.nil?
 
         # Sinatra 1.0 requires an outvar for erb and erubis templates
-        options[:outvar] ||= '@_out_buf' if [:erb, :erubis].include?(engine)
+        options[:outvar] ||= '@_out_buf' if [:erb, :erubis] & [engine]
 
         # Resolve layouts similar to in Rails
         if (options[:layout].nil? || options[:layout] == true) && !self.class.templates.has_key?(:layout)
-          options[:layout] = resolved_layout
+          options[:layout] = resolved_layout || false # We need to force layout false so sinatra don't try to render it
           logger.debug "Resolving layout #{options[:layout]}" if defined?(logger) && options[:layout].present?
         end
 
         # Pass arguments to Sinatra render method
-        super(engine, data, options, locals, &block)
+        super(engine, data, options.dup, locals, &block)
       end
 
       ##
@@ -103,11 +119,8 @@ module Padrino
       # => "/layouts/custom"
       #
       def resolved_layout
-        layout_var = self.class.instance_variable_get(:@_layout) || :application
-        has_layout_at_root = Dir["#{self.settings.views}/#{layout_var}.*"].any?
-        layout_path = has_layout_at_root ? layout_var.to_sym : File.join('layouts', layout_var.to_s).to_sym
-        located_layout = resolve_template(layout_path, :strict_format => true, :raise_exceptions => false)
-        located_layout ? located_layout[0] : nil # Fetch the template file for layout
+        located_layout = resolve_template(self.class.fetch_layout_path, :strict_format => true, :raise_exceptions => false)
+        located_layout ? located_layout[0] : false
       end
 
       ##
@@ -126,13 +139,13 @@ module Padrino
       #
       def resolve_template(template_path, options={})
         # Fetch cached template for rendering options
-        template_path = "/#{template_path}" unless template_path.to_s =~ %r{^/}
+        template_path = "/#{template_path}" unless template_path.to_s[0] == ?/
         rendering_options = [template_path, content_type, locale]
         cached_template = self.class.fetch_template_file(rendering_options)
         return cached_template if cached_template
 
         # Resolve view path and options
-        options.reverse_merge!(:strict_format => false, :raise_exceptions => true)
+        options.reverse_merge!(DEFAULT_RENDERING_OPTIONS)
         view_path = options.delete(:views) || self.options.views || self.class.views || "./views"
         target_extension = File.extname(template_path)[1..-1] || "none" # retrieves explicit template extension
         template_path = template_path.chomp(".#{target_extension}")
@@ -140,7 +153,7 @@ module Padrino
         # Generate potential template candidates
         templates = Dir[File.join(view_path, template_path) + ".*"].map do |file|
           template_engine = File.extname(file)[1..-1].to_sym # retrieves engine extension
-          template_file   =  file.sub(view_path, '').chomp(".#{template_engine}").to_sym # retrieves template filename
+          template_file   = file.sub(view_path, '').chomp(".#{template_engine}").to_sym # retrieves template filename
           [template_file, template_engine] unless IGNORE_FILE_PATTERN.any? { |pattern| template_engine.to_s =~ pattern }
         end
 

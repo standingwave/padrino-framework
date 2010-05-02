@@ -120,7 +120,7 @@ module Padrino
       #   meta_tag "weblog,news", :name => "keywords"
       #
       #   # Generates: <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-      #   meta_tag "text/html; charset=UTF-8", :http-equiv => "Content-Type"
+      #   meta_tag "text/html; charset=UTF-8", 'http-equiv' => "Content-Type"
       #
       def meta_tag(content, options={})
         options.reverse_merge!("content" => content)
@@ -239,7 +239,7 @@ module Padrino
         #
         def uri_root_path(*paths)
           root_uri = self.class.uri_root if self.class.respond_to?(:uri_root)
-          File.join(root_uri || '/', *paths)
+          File.join(ENV['RACK_BASE_URI'].to_s, root_uri || '/', *paths)
         end
 
         ##

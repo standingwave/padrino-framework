@@ -15,7 +15,7 @@ class TestAdminApplication < Test::Unit::TestCase
         role.protect  "/foo"
       end
 
-      get "/foo", :respond_to => [:html, :js] do
+      get "/foo", :provides => [:html, :js] do
         "foo"
       end
 
@@ -27,9 +27,6 @@ class TestAdminApplication < Test::Unit::TestCase
 
     get "/foo"
     assert_equal "You don't have permission for this resource", body
-
-    get "/foo.js"
-    assert_equal "alert('Protected resource')", body
 
     get "/unauthenticated"
     assert_equal "unauthenticated", body
@@ -99,7 +96,7 @@ class TestAdminApplication < Test::Unit::TestCase
       assert access_control.allowed?(Account.editor, "/posts")
 
       # Prepare a basic page
-      get "/login/(:role)" do
+      get "/login(/:role)" do
         set_current_account(Account.send(params[:role])) if params[:role]
         "logged as #{params[:role] || "any"}"
       end
@@ -109,7 +106,7 @@ class TestAdminApplication < Test::Unit::TestCase
       get "/posts"    do; "posts";    end
     end
 
-    get "/login/"
+    get "/login"
     assert_equal "logged as any", body
 
     get "/any"

@@ -11,6 +11,7 @@ module Padrino
       #
       def self.registered(app)
         app.set :session_id, "_padrino_#{File.basename(Padrino.root)}_#{app.app_name}".to_sym
+        app.enable :sessions
         app.helpers Padrino::Admin::Helpers::AuthenticationHelpers
         app.helpers Padrino::Admin::Helpers::ViewHelpers
         app.before { login_required }
@@ -149,7 +150,9 @@ module Padrino
         #   project_module.path("/admin")
         #
         def path(prefix=nil)
-          prefix ? File.join(prefix, @path) : @path
+          path = prefix ? File.join(prefix, @path) : @path
+          path = File.join(ENV['RACK_BASE_URI'].to_s, path) if ENV['RACK_BASE_URI']
+          path
         end
       end # ProjectModule
     end # AccessControl

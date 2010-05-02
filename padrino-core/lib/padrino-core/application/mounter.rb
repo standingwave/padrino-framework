@@ -9,14 +9,15 @@ module Padrino
   #   Mounter.new("blog_app", :app_file => "/path/to/blog/app.rb").to("/blog")
   #
   class Mounter
-    attr_accessor :name, :uri_root, :app_file, :app_class, :app_root, :app_obj
+    attr_accessor :name, :uri_root, :app_file, :app_class, :app_root, :app_obj, :app_host
 
     def initialize(name, options={})
-      @name      = name.downcase
+      @name      = name.underscore
       @app_class = options[:app_class] || name.classify
       @app_file  = options[:app_file]  || locate_app_file
       @app_root  = options[:app_root]  || File.dirname(@app_file)
       @app_obj   = self.app_object
+      @uri_root  = "/"
     end
 
     ##
@@ -33,21 +34,36 @@ module Padrino
     end
 
     ##
-    # Maps Padrino application onto a Rack::Builder
+    # Registers the mounted application onto Padrino for the given host
+    #
+    # ==== Examples
+    #
+    #   Mounter.new("blog_app").to("/blog").host("blog.padrino.org")
+    #   Mounter.new("blog_app").host("blog.padrino.org")
+    #   Mounter.new("catch_all").host(/.*\.padrino.org/)
+    #
+    def host(mount_host)
+      @app_host = mount_host
+      Padrino.insert_mounted_app(self)
+      self
+    end
+
+    ##
+    # Maps Padrino application onto a Padrino::Router
     # For use in constructing a Rack application
     #
-    #   @app.map_onto(@builder)
+    #   @app.map_onto(router)
     #
-    def map_onto(builder)
+    def map_onto(router)
       app_data, app_obj = self, @app_obj
-      builder.map self.uri_root do
-        app_obj.set :uri_root, app_data.uri_root
-        app_obj.set :app_name, app_data.name
-        app_obj.set :app_file, app_data.app_file unless ::File.exist?(app_obj.app_file)
-        app_obj.set :root,     app_data.app_root unless app_data.app_root.blank?
-        app_obj.setup_application! # We need to initialize here the app.
-        run app_obj
-      end
+      app_obj.set :uri_root, app_data.uri_root
+      app_obj.set :app_name, app_data.name
+      app_obj.set :app_file, app_data.app_file unless ::File.exist?(app_obj.app_file)
+      app_obj.set :root,     app_data.app_root unless app_data.app_root.blank?
+      app_obj.set :public,   Padrino.root('public', app_data.uri_root)
+      app_obj.set :static,   File.exist?(app_obj.public)
+      app_obj.setup_application! # We need to initialize here the app.
+      router.map(:path => app_data.uri_root, :to => app_obj, :host => app_data.app_host)
     end
 
     ##

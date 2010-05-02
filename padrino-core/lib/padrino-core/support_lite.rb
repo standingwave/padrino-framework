@@ -22,8 +22,7 @@
 #   * Symbol#to_proc
 #   * SupportLite::OrderedHash
 #
-
-require 'i18n'
+require 'rbconfig'
 require 'active_support/version'
 require 'active_support/core_ext/kernel'
 require 'active_support/core_ext/module'
@@ -41,13 +40,9 @@ require 'active_support/ordered_hash'
 require 'active_support/core_ext/symbol' if ActiveSupport::VERSION::MAJOR < 3
 
 ##
-# Define our own OrderedHash based on AS::OrderedHash
+# Used to know if this file was required
 #
-unless defined?(SupportLite::OrderedHash)
-  module SupportLite
-    OrderedHash = ::ActiveSupport::OrderedHash
-  end
-end
+module SupportLite; end
 
 ##
 # Alias allowing for use of either method to get query parameters
@@ -61,4 +56,30 @@ end
 ##
 # Loads our locales configuration files
 #
-I18n.load_path += Dir["#{File.dirname(__FILE__)}/locale/*.yml"]
+I18n.load_path += Dir["#{File.dirname(__FILE__)}/locale/*.yml"] if defined?(I18n)
+
+module Padrino
+  ##
+  # This method return the correct location of padrino bin or
+  # exec it using Kernel#system with the given args
+  #
+  def self.bin(*args)
+    @_padrino_bin ||= [self.ruby_command, File.expand_path("../../../bin/padrino", __FILE__)]
+    args.empty? ? @_padrino_bin : system(args.unshift(@_padrino_bin).join(" "))
+  end
+
+  ##
+  # Return the path to the ruby interpreter taking into account multiple
+  # installations and windows extensions.
+  #
+  def self.ruby_command
+    @ruby_command ||= begin
+      ruby = File.join(Config::CONFIG['bindir'], Config::CONFIG['ruby_install_name'])
+      ruby << Config::CONFIG['EXEEXT']
+
+      # escape string in case path to ruby executable contain spaces.
+      ruby.sub!(/.*\s.*/m, '"\&"')
+      ruby
+    end
+  end
+end
