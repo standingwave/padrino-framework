@@ -40,41 +40,38 @@ This simple helper will accept any of the standard email attributes and deliver 
           :body => render('email/registered'), :via => :sendmail)
   end
 
-Padrino also supports more structured mailers. We can define a custom mailer extended from <tt>Padrino::Mailer::Base</tt>.
+Padrino also supports more structured mailers. We can define a custom mailer using a mailer block.
 
   # app/mailers/sample_mailer.rb
-  class SampleMailer < Padrino::Mailer::Base
-    def registration_email(name, user_email_address)
+  MyAppName.mailers :sample do
+    message :registration_email do |name, user_email_address|
       from 'admin@site.com'
       to user_email_address
       subject 'Welcome to the site!'
       body    :name => name
-      type    'html'                # optional, defaults to plain/text
-      charset 'windows-1252'        # optional, defaults to utf-8
-      via     :sendmail             # optional, to smtp if defined otherwise sendmail
-      template 'sample_mailer/foo'  # optional, defaults to views/sample_mailer/registration_email.erb
+      type    'html'             # optional, defaults to plain/text
+      charset 'windows-1252'     # optional, defaults to utf-8
+      via     :sendmail          # optional, to smtp if defined otherwise sendmail
+      template 'path/to/render'  # optional, defaults to views/mailers/sample/registration_email.erb
     end
   end
 
 This defines a mail called '<tt>registration_mail</tt>' with the specified attributes for delivery. The <tt>body</tt> method
 is passing the <tt>name</tt> attribute to the body message template which should be defined in
-<tt>[views_path]/sample_mailer/registration_email.erb</tt> as shown below:
+<tt>[views_path]/mailers/sample/registration_email.erb</tt> as shown below:
 
-  # ./views/sample_mailer/registration_email.erb
+  # ./views/mailers/sample/registration_email.erb
   This is the body of the email and can access the <%= name %> that was passed in from the mailer definition
   That's all there is to defining the body of the email which can be plain text or html
 
 Once the mailer definition has been completed and the template has been defined, the email can be sent using:
 
-  SampleMailer.deliver(:registration_email, "Bob", "bob@bobby.com")
+  deliver(:sample, :registration_email, "Bob", "bob@bobby.com")
 
-or if you like the method_missing approach:
+And that will then deliver the email according the the configured options. This is all you need to send basic emails.
 
-  SampleMailer.deliver_registration_email "Bob", 'bob@bobby.com'
-
-And that will then deliver the email according the the configured options. This is really all you need to send emails.
-
-Be sure to check out the
+Note that Padrino also supports an (older) ActionMailer-inspired syntax. The mailer also supports the attachment
+of files and various other options. Be sure to check out the 
 {Padrino Mailer}[http://www.padrinorb.com/guides/padrino-mailer] guide for more details on usage.
 
 == Copyright

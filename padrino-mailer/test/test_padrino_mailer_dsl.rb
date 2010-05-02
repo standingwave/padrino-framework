@@ -1,23 +1,16 @@
 require File.expand_path(File.dirname(__FILE__) + '/helper')
-require File.expand_path(File.dirname(__FILE__) + '/fixtures/mailer_app/app')
+require File.expand_path(File.dirname(__FILE__) + '/fixtures/mailer_app_dsl/app')
 
-class TestPadrinoMailer < Test::Unit::TestCase
+class TestPadrinoMailerDsl < Test::Unit::TestCase
   def app
-    MailerDemo.tap { |app| app.set :environment, :test }
+    MailerDemoDsl.tap { |app| app.set :environment, :test }
   end
 
   context 'for mail delivery in sample application' do
     setup {
       Padrino::Mailer::Base::views_path << MailerDemo.views
-      MailerDemo::SampleMailer.smtp_settings = MailerDemo.smtp_settings
+      MailerDemoDsl::SampleMailer.smtp_settings = MailerDemo.smtp_settings
     }
-    
-    should "be able to deliver inline emails using the email helper" do
-      assert_email_sent(:to => 'john@apple.com', :from => 'joe@smith.com', :via => :smtp, 
-                        :subject => 'Test Email', :body => 'Test Body')
-      visit '/deliver/inline', :post
-      assert_equal 'mail delivered', last_response.body
-    end
 
     should 'be able to deliver plain text emails' do
       assert_email_sent(:to => 'john@fake.com', :from => 'noreply@birthday.com', :via => :smtp,

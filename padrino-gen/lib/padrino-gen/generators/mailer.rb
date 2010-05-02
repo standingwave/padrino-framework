@@ -31,9 +31,10 @@ module Padrino
           app = options[:app].underscore
           check_app_existence(app)
           self.behavior = :revoke if options[:destroy]
-          simple_name = name.to_s.gsub(/mailer/i, '')
-          @mailer_basename = "#{simple_name.downcase.underscore}_mailer"
-          @mailer_klass    = "#{simple_name.downcase.camelize}Mailer"
+          @app_name = fetch_app_name(app)
+          @short_name = name.to_s.gsub(/mailer/i, '').underscore.downcase
+          @mailer_basename = "#{@short_name.underscore}_mailer"
+          @mailer_klass    = "#{@short_name.camelize}Mailer"
           template "templates/mailer_initializer.rb.tt", destination_root("lib/mailer.rb"), :skip => true
           template "templates/mailer.rb.tt", destination_root(app, "mailers", "#{@mailer_basename}.rb")
           inject_into_file(destination_root(app, "app.rb"), "    register MailerInitializer\n", :after => "configure do\n")

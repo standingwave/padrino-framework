@@ -2,18 +2,18 @@
 
 Mailer methods can be defined using the simple format:
 
-  def registration_email(name, user_email_address)
+  message :registration_email do |name, user|
     from 'admin@site.com'
-    to user_email_address
+    to   user.email
     subject 'Welcome to the site!'
     body    :name => name
-    content_type 'text/html'        # optional, defaults to plain/text
-    charset 'windows-1252'        # optional, defaults to utf-8
-    via     :sendmail             # optional, to smtp if defined otherwise sendmail
+    content_type 'text/html'       # optional, defaults to plain/text
+    charset 'windows-1252'         # optional, defaults to utf-8
+    via     :sendmail              # optional, to smtp if defined, otherwise sendmail
   end
 
 =end
 
-class <%= @mailer_klass %> < Padrino::Mailer::Base
-  # Mailer methods here...
+<%= @app_name %>.mailers :<%= @short_name %> do
+  # Message definitions here...
 end

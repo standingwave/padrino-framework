@@ -26,7 +26,7 @@ module Padrino
         end
 
         def build_mail(options)
-          mail = Mail.new
+          mail          = Mail.new
           mail.to       = options[:to]
           mail.cc       = options[:cc]   || ''
           mail.bcc      = options[:bcc]  || ''

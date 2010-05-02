@@ -2,15 +2,15 @@ module Padrino
   module Mailer
     ##
     # This represents a particular mail object which will need to be sent
-    # A mail_object requires the mail attributes and the delivery_settings
+    # A email requires the mail attributes and the delivery_settings
     #
-    class MailObject
+    class Email
       ##
-      # Initialize a new MailObject
+      # Initialize a new Email
       #
       # ==== Examples
       #
-      #   Padrino::Mailer::MailObject.new(
+      #   Padrino::Mailer::Email.new(
       #     :subject => "Hey this is my subject",
       #     :to => "info@padrinorb.org",
       #     :from => "foo@bar.com",
@@ -27,7 +27,7 @@ module Padrino
       #
       # ==== Examples
       #
-      #   @mail_object.deliver
+      #   @email.deliver
       #
       def deliver
         @mail_attributes.reverse_merge!(:via => self.delivery_method.to_sym)
@@ -60,6 +60,6 @@ module Padrino
         def send_mail(delivery_attributes)
           Delivery.mail(delivery_attributes) && true
         end
-    end # MailObject
+    end # Email
   end # Mailer
 end # Padrino
