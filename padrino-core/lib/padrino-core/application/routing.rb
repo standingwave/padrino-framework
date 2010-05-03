@@ -1,5 +1,5 @@
 require 'usher' unless defined?(Usher)
-require 'padrino-core/support_lite' unless String.method_defined?(:blank?)
+require 'padrino-core/support_lite' unless defined?(SupportLite)
 
 Usher::Route.class_eval { attr_accessor :custom_conditions, :before_filters, :after_filters, :use_layout }
 
@@ -12,6 +12,8 @@ module Padrino
   # to the url throughout the application.
   #
   module Routing
+    CONTENT_TYPE_ALIASES = { :htm => :html }
+
     class UnrecognizedException < RuntimeError #:nodoc:
     end
 
@@ -221,6 +223,7 @@ module Padrino
         url = router.generator.generate(name, params)
         url = File.join(uri_root, url) if defined?(uri_root) && uri_root != "/"
         url = File.join(ENV['RACK_BASE_URI'].to_s, url) if ENV['RACK_BASE_URI']
+        url = "/" if url.blank?
         url
       rescue Usher::UnrecognizedException
         route_error = "route mapping for url(#{name.inspect}) could not be found!"
@@ -255,9 +258,6 @@ module Padrino
           options[:conditions] ||= {}
           options[:conditions][:request_method] = verb
           options[:conditions][:host] = options.delete(:host) if options.key?(:host)
-
-          # Because of self.options.host
-          host_name(options.delete(:host)) if options.key?(:host)
 
           # Sinatra defaults
           define_method "#{verb} #{path}", &block
@@ -331,6 +331,7 @@ module Padrino
               # Now we need to add our controller path only if not mapped directly
               if map.blank?
                 controller_path = controller.join("/")
+                path.gsub!(%r{^\(/\)|/\?}, "")
                 path = File.join(controller_path, path)
               end
               # Here we build the correct name route
@@ -347,17 +348,11 @@ module Padrino
             end
 
             # Small reformats
-            path.gsub!(/\/?index\/?/, '')                             # Remove index
-            path = (uri_root == "/" ? "/" : "(/)") if path.blank?     # Add a trailing delimiter if path is empty
-
-            # We need to have a path that start with / in some circumstances and that don't end with /
-            if path != "(/)" && path != "/"
-              path = "/" + path unless path =~ %r{^/}
-              path.sub!(%r{/$}, '')
-            end
-
-            # We need to fix a few differences between the usher and sintra router
-            path.sub!(%r{/\?$}, '(/)') #  '/foo/?' => '/foo(/)'
+            path.gsub!(%r{/?index/?}, '')                  # Remove index path
+            path = "/"        if path.blank?               # Add a trailing delimiter if path is empty
+            path = "/" + path if path !~ %r{^\(?/} && path # Paths must start with a trailing delimiter
+            path.sub!(%r{/\?$}, '(/)')                     # Sinatra compat '/foo/?' => '/foo(/)'
+            path.sub!(%r{/$}, '') if path != "/"           # Remove latest trailing delimiter
           end
 
           # Merge in option defaults
@@ -398,18 +393,26 @@ module Padrino
           mime_types = types.map{ |t| mime_type(t) }
 
           condition {
-            matching_types = (request.accept & mime_types)
+            matching_types = (request.accept.map { |a| a.split(";")[0].strip } & mime_types)
             request.path_info =~ /\.([^\.\/]+)$/
-            format = ($1 || :html).to_sym
-            match_format = types.include?(format) || types.include?(:any)
-            @_content_type =
-              if mime_type = matching_types.first
-                Rack::Mime::MIME_TYPES.find { |k, v| v == matching_types.first }[0].sub(/\./,'').to_sym
-              else
-                format
-              end
-            content_type(@_content_type, :charset => 'utf-8')
-            match_format || !matching_types.empty?
+            url_format = $1.to_sym if $1
+
+            if !url_format && matching_types.first
+               type = Rack::Mime::MIME_TYPES.find { |k, v| v == matching_types.first }[0].sub(/\./,'').to_sym
+               accept_format = CONTENT_TYPE_ALIASES[type] || type
+            end
+
+            matched_format = types.include?(:any) ||
+                             types.include?(accept_format) ||
+                             types.include?(url_format) ||
+                             (request.accept.empty? && types.include?(:html))
+
+            if matched_format
+              @_content_type = url_format || accept_format || :html
+              content_type(@_content_type, :charset => 'utf-8')
+            end
+
+            matched_format || !matching_types.empty?
           }
         end
         alias :respond_to :provides

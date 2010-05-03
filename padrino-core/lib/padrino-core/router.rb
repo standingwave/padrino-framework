@@ -13,9 +13,9 @@ module Padrino
   #
   # ==== Options
   #
-  #   :to:: The class of application that you want mount
-  #   :path:: Map the app to the given path
-  #   :host:: Map the app to the given host
+  # :to:: The class of application that you want mount
+  # :path:: Map the app to the given path
+  # :host:: Map the app to the given host
   #
   # ==== Examples
   #
@@ -65,6 +65,8 @@ module Padrino
         next unless host.nil? || hHost =~ host
         next unless rPath =~ match && rest = $1
         next unless rest.empty? || rest[0] == ?/
+
+        rest = "/" if rest.empty?
 
         return app.call(
           env.merge(
