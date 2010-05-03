@@ -16,7 +16,7 @@ class TestProjectGenerator < Test::Unit::TestCase
     end
     
     should "generate tiny skeleton" do
-      assert_nothing_raised { silence_logger { @project.start(['sample_project', '--tiny','--root=/tmp', '--script=none']) } }
+      assert_nothing_raised { silence_logger { generate(:project,'sample_project', '--tiny','--root=/tmp', '--script=none') } }
       assert_file_exists('/tmp/sample_project')
       assert_file_exists('/tmp/sample_project/app')
       assert_file_exists('/tmp/sample_project/app/controllers.rb')
