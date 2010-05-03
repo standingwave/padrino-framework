@@ -117,8 +117,13 @@ module Padrino
       def app_skeleton(app,tiny)
         directory("app/", destination_root(app))
         if tiny
-          template "templates/controller.rb.tt", destination_root("#{app}/controllers.rb")
-          template "templates/helper.rb.tt", destination_root("#{app}/helpers.rb")
+          template "templates/controller.rb.tt", destination_root(app,"controllers.rb")
+          template "templates/helper.rb.tt", destination_root(app,"helpers.rb")
+          # clean this up with initializer method from templates branch
+          @short_name = 'notifier'
+          template "templates/mailer_initializer.rb.tt", destination_root("lib/mailer.rb"), :skip => true
+          inject_into_file(destination_root(app, "app.rb"), "    register MailerInitializer\n", :after => "configure do\n")
+          template "templates/mailer.rb.tt", destination_root(app, "mailers.rb")
         else
           empty_directory destination_root("#{app}/controllers/")
           empty_directory destination_root("#{app}/helpers/")

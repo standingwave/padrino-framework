@@ -21,6 +21,9 @@ class TestProjectGenerator < Test::Unit::TestCase
       assert_file_exists('/tmp/sample_project/app')
       assert_file_exists('/tmp/sample_project/app/controllers.rb')
       assert_file_exists('/tmp/sample_project/app/helpers.rb')
+      assert_file_exists('/tmp/sample_project/lib/mailer.rb')
+      assert_file_exists('/tmp/sample_project/app/mailers.rb')
+      assert_match_in_file(/:notifier/, '/tmp/sample_project/app/mailers.rb')
       assert_no_file_exists('/tmp/sample_project/demo/helpers')
       assert_no_file_exists('/tmp/sample_project/demo/controllers')
     end
