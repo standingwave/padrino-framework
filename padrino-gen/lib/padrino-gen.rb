@@ -40,7 +40,7 @@ module Padrino
       # Return a ordered list of task with their class
       #
       def mappings
-        @_mappings ||= SupportLite::OrderedHash.new
+        @_mappings ||= ActiveSupport::OrderedHash.new
       end
 
       ##
