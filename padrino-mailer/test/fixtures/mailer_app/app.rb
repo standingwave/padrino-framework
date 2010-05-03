@@ -16,8 +16,8 @@ class MailerDemo < Sinatra::Base
 
   register Padrino::Mailer
 
-  class SampleMailer < Padrino::Mailer::Base
-    def birthday_message(name, age)
+  mailer :sample do
+    message :birthday do |name, age|
       subject "Happy Birthday!"
       to   'john@fake.com'
       from 'noreply@birthday.com'
@@ -25,7 +25,7 @@ class MailerDemo < Sinatra::Base
       via  :smtp
     end
 
-    def anniversary_message(names, years_married)
+    message :anniversary do |names, years_married|
       subject "Happy anniversary!"
       to   'julie@fake.com'
       from 'noreply@anniversary.com'
@@ -33,7 +33,7 @@ class MailerDemo < Sinatra::Base
       content_type 'text/html'
     end
 
-    def welcome_message(name)
+    message :welcome do |name|
       template 'mailers/sample/foo_message'
       subject "Welcome Message!"
       to   'john@fake.com'
@@ -42,24 +42,24 @@ class MailerDemo < Sinatra::Base
       via  :smtp
     end
   end
-
+  
   post "/deliver/inline" do
     result = email(:to => "john@apple.com", :from => "joe@smith.com", :subject => "Test Email", :body => "Test Body", :via => :smtp)
     result ? "mail delivered" : 'mail not delivered'
   end
 
   post "/deliver/plain" do
-    result = SampleMailer.deliver_birthday_message("Joey", 21)
-    result ? "mail delivered" : 'mail not delivered'
-  end
-
-  post "/deliver/custom" do
-    result = SampleMailer.deliver_welcome_message("Bobby")
+    result = deliver(:sample, :birthday, "Joey", 21)
     result ? "mail delivered" : 'mail not delivered'
   end
 
   post "/deliver/html" do
-    result = SampleMailer.deliver_anniversary_message("Joey & Charlotte", 16)
+    result = deliver(:sample, :anniversary, "Joey & Charlotte", 16)
+    result ? "mail delivered" : 'mail not delivered'
+  end
+
+  post "/deliver/custom" do
+    result = deliver(:sample, :welcome, "Bobby")
     result ? "mail delivered" : 'mail not delivered'
   end
 end
