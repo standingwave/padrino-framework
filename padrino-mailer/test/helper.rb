@@ -39,6 +39,11 @@ module Kernel
   end unless respond_to?(:silence_warnings)
 end
 
+class Sinatra::Base
+  # Allow assertions in request context
+  include Test::Unit::Assertions
+end
+
 class Test::Unit::TestCase
   include Rack::Test::Methods
 

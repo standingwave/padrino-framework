@@ -13,12 +13,16 @@ class TestMailer < Test::Unit::TestCase
     should 'send a basic inline email' do
       mock_app do
         get "/" do
-          email do
+          email = email do
             from    'padrino@me.com'
             to      'padrino@you.com'
             subject 'Hello there Padrino'
             body    'Body'
           end
+          assert_equal ['padrino@me.com'],    email.from
+          assert_equal ['padrino@you.com'],   email.to
+          assert_equal 'Hello there Padrino', email.subject
+          assert_equal 'Body',                email.body.to_s
         end
       end
       get "/"
@@ -28,12 +32,16 @@ class TestMailer < Test::Unit::TestCase
     should 'send a basic inline from hash' do
       mock_app do
         get "/" do
-          email({
+          email = email({
             :from    => 'padrino@me.com',
             :to      => 'padrino@you.com',
             :subject => 'Hello there Padrino',
             :body    => 'Body'
           })
+          assert_equal ['padrino@me.com'],    email.from
+          assert_equal ['padrino@you.com'],   email.to
+          assert_equal 'Hello there Padrino', email.subject
+          assert_equal 'Body',                email.body.to_s
         end
       end
       get "/"
@@ -43,12 +51,16 @@ class TestMailer < Test::Unit::TestCase
     should 'send a email inline' do
       mock_app do
         get "/" do
-          email do
+          email = email do
             from    'padrino@me.com'
             to      'padrino@you.com'
             subject 'Hello there Padrino'
             body    render(File.dirname(__FILE__) + '/fixtures/basic.erb')
           end
+          assert_equal ['padrino@me.com'],    email.from
+          assert_equal ['padrino@you.com'],   email.to
+          assert_equal 'Hello there Padrino', email.subject
+          assert_equal 'This is a body of text from a template', email.body.to_s
         end
       end
       get "/"
@@ -70,6 +82,11 @@ class TestMailer < Test::Unit::TestCase
       end
       get "/"
       assert ok?
+      email = @app.deliver(:alternate, :foo)
+      assert_equal ['padrino@me.com'],    email.from
+      assert_equal ['padrino@you.com'],   email.to
+      assert_equal 'Hello there Padrino', email.subject
+      assert_equal 'This is a foo message in mailers/alternate dir', email.body.to_s
     end
 
     should 'raise an error if there are two messages with the same name' do
