@@ -1,5 +1,6 @@
-SEQUEL = (<<-SEQUEL).gsub(/^ {10}/, '') unless defined?(SEQUEL)
+SEQUEL = (<<-SEQUEL) unless defined?(SEQUEL)
 Sequel::Model.plugin(:schema)
+Sequel::Model.raise_on_save_failure = false # Do not throw exceptions on failure
 DB = case Padrino.env
   when :development then Sequel.connect("sqlite://" + Padrino.root('db', "development.db"), :loggers => [logger])
   when :production  then Sequel.connect("sqlite://" + Padrino.root('db', "production.db"),  :loggers => [logger])
@@ -14,7 +15,7 @@ def setup_orm
   empty_directory('db/migrate')
 end
 
-SQ_MODEL = (<<-MODEL).gsub(/^ {10}/, '') unless defined?(SQ_MODEL)
+SQ_MODEL = (<<-MODEL) unless defined?(SQ_MODEL)
 class !NAME! < Sequel::Model
 
 end
@@ -26,7 +27,7 @@ def create_model_file(name, fields)
   create_file(model_path, model_contents)
 end
 
-SQ_MIGRATION = (<<-MIGRATION).gsub(/^ {10}/, '') unless defined?(SQ_MIGRATION)
+SQ_MIGRATION = (<<-MIGRATION) unless defined?(SQ_MIGRATION)
 class !FILECLASS! < Sequel::Migration
   def up
     !UP!
@@ -38,15 +39,14 @@ class !FILECLASS! < Sequel::Migration
 end
 MIGRATION
 
-SQ_MODEL_UP_MG = (<<-MIGRATION).gsub(/^ {6}/, '') unless defined?(SQ_MODEL_UP_MG)
+SQ_MODEL_UP_MG = (<<-MIGRATION).gsub(/^/, '    ') unless defined?(SQ_MODEL_UP_MG)
 create_table :!TABLE! do
   primary_key :id
-  # <type> <name>
   !FIELDS!
 end
 MIGRATION
 
-SQ_MODEL_DOWN_MG = (<<-MIGRATION).gsub(/^ {10}/, '') unless defined?(SQ_MODEL_DOWN_MG)
+SQ_MODEL_DOWN_MG = (<<-MIGRATION) unless defined?(SQ_MODEL_DOWN_MG)
 drop_table :!TABLE!
 MIGRATION
 
@@ -56,7 +56,7 @@ def create_model_migration(migration_name, name, columns)
          :base => SQ_MIGRATION, :up => SQ_MODEL_UP_MG, :down => SQ_MODEL_DOWN_MG)
 end
 
-SQ_CHANGE_MG = (<<-MIGRATION).gsub(/^ {6}/, '') unless defined?(SQ_CHANGE_MG)
+SQ_CHANGE_MG = (<<-MIGRATION).gsub(/^/, '    ') unless defined?(SQ_CHANGE_MG)
 alter_table :!TABLE! do
   !COLUMNS!
 end
