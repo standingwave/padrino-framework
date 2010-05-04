@@ -8,8 +8,8 @@ class TestPadrinoMailer < Test::Unit::TestCase
 
   context 'for mail delivery in sample application' do
     setup {
-      Padrino::Mailer::Base::views_path << MailerDemo.views
-      MailerDemo::SampleMailer.smtp_settings = MailerDemo.smtp_settings
+      Padrino::Mailer::Base::views_path = MailerDemo.views
+      Padrino::Mailer::Base.smtp_settings = MailerDemo.smtp_settings
     }
     
     should "be able to deliver inline emails using the email helper" do

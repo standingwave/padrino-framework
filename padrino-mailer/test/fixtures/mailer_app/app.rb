@@ -21,7 +21,7 @@ class MailerDemo < Sinatra::Base
       subject "Happy Birthday!"
       to   'john@fake.com'
       from 'noreply@birthday.com'
-      body 'name' => name, 'age' => age
+      body render('sample/birthday', :locals => { :name => name, :age => age })
       via  :smtp
     end
 
@@ -29,22 +29,21 @@ class MailerDemo < Sinatra::Base
       subject "Happy anniversary!"
       to   'julie@fake.com'
       from 'noreply@anniversary.com'
-      body 'names' => names, 'years_married' => years_married
+      body render('sample/anniversary', :locals => { :names => names, :years_married => years_married })
       content_type 'text/html'
     end
 
     message :welcome do |name|
-      template 'mailers/sample/foo_message'
       subject "Welcome Message!"
       to   'john@fake.com'
       from 'noreply@custom.com'
-      body 'name' => name
+      body render('sample/foo_message', :locals => {  :name => name })
       via  :smtp
     end
   end
   
   post "/deliver/inline" do
-    result = email(:to => "john@apple.com", :from => "joe@smith.com", :subject => "Test Email", :body => "Test Body", :via => :smtp)
+    result = email(:to => "john@apple.com", :from => "joe@smith.com", :subject => "Test Email", :body => "Test Body", :via => 'smtp')
     result ? "mail delivered" : 'mail not delivered'
   end
 

@@ -1,12 +1,3 @@
-require 'rubygems'
-require 'net/smtp'
-begin
-  require 'smtp_tls'
-rescue LoadError
-end
-require 'base64'
-require 'mail'
-
 module Padrino
   module Mailer
     module Delivery

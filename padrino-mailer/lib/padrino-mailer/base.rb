@@ -17,111 +17,28 @@ module Padrino
     # and then all delivered mail will use these settings unless otherwise specified.
     #
     class Base
-      ##
-      # Returns the available mail fields when composing a message
-      #
-      def self.mail_fields
-        [:to, :cc, :bcc, :reply_to, :from, :subject, :content_type, :charset, :via, :attachments, :template]
-      end
-
       @@views_path = []
       cattr_accessor :smtp_settings
       cattr_accessor :views_path
-      attr_accessor  :mail_attributes
+      
+      attr_accessor :mailer_name
+      attr_accessor :messages
 
-      def initialize(mail_name=nil) #:nodoc:
-        @mail_name = mail_name
-        @mail_attributes = {}
+      def initialize(name, &block) #:nodoc:
+        self.mailer_name = name
+        self.messages ||= {}
+        instance_eval(&block)
       end
-
-      ##
-      # Defines an alternate dsl syntax for defining a message within a mailer class
-      #
-      # ==== Examples
-      #
-      #   message :birthday do |name, age|
-      #     subject "Happy Birthday!"
-      #     to   'john@fake.com'
-      #     from 'noreply@birthday.com'
-      #     body 'name' => name, 'age' => age
-      #   end
-      #
-      def self.message(name, &block)
-        define_method(name, &block)
+      
+      def message(name, &block)
+        self.messages[name] = Proc.new { |*attrs|
+          m = Padrino::Mailer::Message.new
+          m.views_path = self.class.views_path
+          m.mailer_name = self.mailer_name
+          m.instance_exec(*attrs, &block)
+          m
+        }
       end
-
-      ##
-      # Defines a method allowing mail attributes to be set into a hash for use when delivering
-      #
-      self.mail_fields.each do |field|
-        define_method(field) { |value| @mail_attributes[field] = value }
-      end
-
-      ##
-      # Assigns the body key to the mail attributes either with the rendered body from a template or the given string value
-      #
-      def body(body_value)
-        if body_value.is_a?(Hash) # body is locals hash to pass to the template
-          final_template = template_path
-          raise "Template for '#{@mail_name}' could not be located in views path!" unless final_template
-          @mail_attributes[:body] = Tilt.new(final_template).render(self, body_value.symbolize_keys)
-        else # body is a string to render
-          @mail_attributes[:body] = body_value if body_value.is_a?(String)
-        end
-      end
-
-      ##
-      # Returns the path to the email template searched for using glob pattern
-      #
-      def template_path
-        self.views_path.each do |view_path|
-          template = Dir[File.join(view_path, template_pattern)].first
-          return template if template
-        end
-        raise File.join(self.views_path.first, template_pattern)
-        return nil
-      end
-
-      ##
-      # Delivers the specified message for mail_name to the intended recipients
-      # mail_name corresponds to the name of a defined method within the mailer class
-      #
-      # ==== Examples
-      #
-      #   SampleMailer.deliver(:birthday_message)
-      #
-      def self.deliver(mail_name, *args)
-        email = self.new(mail_name)
-        email.method(mail_name).call(*args)
-        Email.new(email.mail_attributes, self.smtp_settings).deliver
-      end
-
-      ##
-      # Returns true if a mail exists with the name being delivered
-      #
-      def self.respond_to?(method_sym, include_private = false)
-        method_sym.to_s =~ /deliver_(.*)/ ? self.method_defined?($1) : super(method_sym, include_private)
-      end
-
-      ##
-      # Handles method missing for a mailer class. Delivers a message based on the method
-      # being called i.e #deliver_birthday_message(22) invokes #birthday_message(22) to setup mail object
-      #
-      def self.method_missing(method_sym, *arguments, &block)
-        method_sym.to_s =~ /deliver_(.*)/ ? self.deliver($1, *arguments) : super(method_sym, *arguments, &block)
-      end
-
-      private
-        # Returns the glob pattern of the template file to locate and render
-        def template_pattern
-          @_pattern ||= (@mail_attributes[:template].present? ? "#{@mail_attributes[:template]}.*" :
-                         File.join('mailers', short_name, "#{@mail_name}.*"))
-        end
-        
-        # Returns the short name for a mailer (i.e UserNoticeMailer => user_notice)
-        def short_name
-          self.class.name.gsub(/mailer/i, '').underscore.split("/").last
-        end
     end # Base
   end # Mailer
 end # Padrino
