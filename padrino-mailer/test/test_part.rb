@@ -57,6 +57,25 @@ class TestPart < Test::Unit::TestCase
       assert_equal "text html", message.parts[1].body.decoded
     end
 
+    should "works with less explict multipart templates" do
+      message = Padrino::Mailer::Message.new do
+        views   File.dirname(__FILE__) + '/fixtures/views'
+        mailer  :multipart
+        to      'padrino@test.lindsaar.net'
+        subject "nested multipart"
+        from    "test@example.com"
+
+        text_part render('basic.text')
+        html_part render('basic.html')
+      end
+
+      assert_equal 2, message.parts.length
+      assert_equal "text/plain", message.parts[0].content_type
+      assert_equal "plain text", message.parts[0].body.decoded
+      assert_equal "text/html", message.parts[1].content_type
+      assert_equal "text html", message.parts[1].body.decoded
+    end
+
     should "provide a way to instantiate a new part as you go down" do
       message = Padrino::Mailer::Message.new do
         to           'padrino@test.lindsaar.net'

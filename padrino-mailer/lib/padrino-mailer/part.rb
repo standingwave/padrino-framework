@@ -1,7 +1,7 @@
 module Padrino
   module Mailer
     ##
-    # TODO: a desc here
+    # TODO: desc here
     #
     class Part < Padrino::Mailer::Message
     end # Part

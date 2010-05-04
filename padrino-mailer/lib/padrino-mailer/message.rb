@@ -48,12 +48,13 @@ module Padrino
       ##
       # Accessor for html_part
       #
-      def html_part(&block)
-        if block_given?
+      def html_part(msg=nil, &block)
+        if msg || block_given?
           @html_part = Padrino::Mailer::Part.new('Content-Type: text/html;')
           @html_part.views_path  = views
           @html_part.mailer_name = mailer
-          @html_part.instance_eval(&block)
+          @html_part.body = msg if msg.is_a?(String)
+          @html_part.instance_eval(&block) if block_given?
           add_multipart_alternate_header unless html_part.blank?
           add_part(@html_part)
         else
@@ -64,12 +65,13 @@ module Padrino
       ##
       # Accessor for text_part
       #
-      def text_part(&block)
-        if block_given?
+      def text_part(msg=nil, &block)
+        if msg || block_given?
           @text_part = Padrino::Mailer::Part.new('Content-Type: text/plain;')
           @text_part.views_path  = views
           @text_part.mailer_name = mailer
-          @text_part.instance_eval(&block)
+          @text_part.body = msg if msg.is_a?(String)
+          @text_part.instance_eval(&block) if block_given?
           add_multipart_alternate_header unless html_part.blank?
           add_part(@text_part)
         else
@@ -82,7 +84,7 @@ module Padrino
       # text_part are both defined in a message, then it will be a multipart/alternative
       # message and set itself that way.
       #
-      def html_part=(msg = nil)
+      def html_part=(msg=nil)
         if msg
           @html_part = msg
         else
@@ -99,7 +101,7 @@ module Padrino
       # html_part are both defined in a message, then it will be a multipart/alternative
       # message and set itself that way.
       #
-      def text_part=(msg = nil)
+      def text_part=(msg=nil)
         if msg
           @text_part = msg
         else
