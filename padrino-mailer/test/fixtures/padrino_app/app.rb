@@ -1,9 +1,8 @@
-require 'sinatra/base'
-require 'haml'
+ENV['PADRINO_ENV'] = 'test'
+PADRINO_ROOT = File.dirname(__FILE__) unless defined? PADRINO_ROOT
 
-class MailerDemo < Sinatra::Base
+class PadrinoApp < Padrino::Application
   configure do
-    set :root, File.dirname(__FILE__)
     set :smtp_settings, {
       :host   => 'smtp.gmail.com',
       :port   => '587',
@@ -13,8 +12,6 @@ class MailerDemo < Sinatra::Base
       :auth   => :plain
     }
   end
-
-  register Padrino::Mailer
 
   mailer :sample do
     email :birthday do |name, age|
@@ -42,7 +39,7 @@ class MailerDemo < Sinatra::Base
       via  :test
     end
   end
-  
+
   post "/deliver/inline" do
     result = email(:to => "john@apple.com", :from => "joe@smith.com", :subject => "Test Email", :body => "Test Body", :via => :test)
     result ? "mail delivered" : 'mail not delivered'
@@ -63,3 +60,6 @@ class MailerDemo < Sinatra::Base
     result ? "mail delivered" : 'mail not delivered'
   end
 end
+
+Padrino.mount_core("PadrinoApp")
+Padrino.load!

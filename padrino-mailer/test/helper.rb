@@ -21,12 +21,6 @@ require 'padrino-mailer'
 class Test::Unit::TestCase
   include Rack::Test::Methods
 
-  def stop_time_for_test
-    time = Time.now
-    Time.stubs(:now).returns(time)
-    return time
-  end
-
   # Sets up a Sinatra::Base subclass defined with the block
   # given. Used in setup or individual spec methods to establish
   # the application.
@@ -36,25 +30,6 @@ class Test::Unit::TestCase
 
   def app
     Rack::Lint.new(@app)
-  end
-
-  # assert_has_tag(:h1, :content => "yellow") { "<h1>yellow</h1>" }
-  # In this case, block is the html to evaluate
-  def assert_has_tag(name, attributes = {}, &block)
-    html = block && block.call
-    matcher = HaveSelector.new(name, attributes)
-    raise "Please specify a block!" if html.blank?
-    assert matcher.matches?(html), matcher.failure_message
-  end
-
-  # assert_has_no_tag, tag(:h1, :content => "yellow") { "<h1>green</h1>" }
-  # In this case, block is the html to evaluate
-  def assert_has_no_tag(name, attributes = {}, &block)
-    html = block && block.call
-    attributes.merge!(:count => 0)
-    matcher = HaveSelector.new(name, attributes)
-    raise "Please specify a block!" if html.blank?
-    assert matcher.matches?(html), matcher.failure_message
   end
 
   # Silences the output by redirecting to stringIO
