@@ -31,10 +31,12 @@ module Padrino
       end
       
       def message(name, &block)
+        raise "The message '#{name}' is already defined" if self.messages[name].present?
         self.messages[name] = Proc.new { |*attrs|
           m = Padrino::Mailer::Message.new
           m.views_path = self.class.views_path
           m.mailer_name = self.mailer_name
+          m.smtp_settings = self.class.smtp_settings
           m.instance_exec(*attrs, &block)
           m
         }

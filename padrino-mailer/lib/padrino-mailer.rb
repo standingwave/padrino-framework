@@ -27,7 +27,7 @@ module Padrino
     # Used Padrino::Application for register Padrino::Mailer::Base::views_path
     #
     def self.registered(app)
-      Padrino::Mailer::Base::views_path << app.views
+      Padrino::Mailer::Base::views_path = app.views
       app.helpers Padrino::Mailer::Helpers
     end
 
@@ -40,9 +40,14 @@ module Padrino
       #   email :to => @user.email, :from => "awesomeness@example.com",
       #         :subject => "Welcome to Awesomeness!", :body => haml(:some_template)
       #
-      def email(mail_attributes)
-        smtp_settings = Padrino::Mailer::Base.smtp_settings
-        Padrino::Mailer::Message.new(mail_attributes, smtp_settings).deliver!
+      def email(mail_attributes={}, &block)
+        message = Padrino::Mailer::Message.new
+        mail_attributes.each_pair { |k, v| message.method(k).call(v) }
+        message.instance_eval(&block) if block_given?
+        message.views_path    = Padrino::Mailer::Base::views_path
+        message.smtp_settings = Padrino::Mailer::Base.smtp_settings
+        message.deliver
+        message
       end
 
       ##
@@ -101,7 +106,7 @@ module Padrino
         #   deliver(:example, :message, "John")
         #
         def deliver(mailer_name, message_name, *attributes)
-          registered_mailers[mailer_name].messages[message_name].call(*attributes).deliver!
+          registered_mailers[mailer_name].messages[message_name].call(*attributes).deliver
         end
       end
     end

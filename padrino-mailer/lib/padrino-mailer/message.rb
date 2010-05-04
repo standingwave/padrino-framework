@@ -14,19 +14,30 @@ module Padrino
     #     :to => "info@padrinorb.org",
     #     :from => "foo@bar.com",
     #     :body => "This is my body"
-    #   ).deliver!
+    #   ).deliver
     #
     #   Padrino::Mailer::Message.new {
     #     subject "Hey this is my subject",
     #     to      "info@padrinorb.org",
     #     from    "foo@bar.com",
     #     body   "This is my body"
-    #   }.deliver!
+    #   }.deliver
     #
     class Message < ::Mail::Message
       alias :via  :delivery_method
       attr_accessor :mailer_name
       attr_accessor :views_path
+      attr_accessor :smtp_settings
+      
+      def views(value=nil)
+        self.views_path = value if value
+        self.views_path.to_s if self.views_path
+      end
+      
+      def mailer(value=nil)
+        self.mailer_name = value if value
+        self.mailer_name.to_s if self.mailer_name
+      end
 
       def render(template, options={}, locals={}, &block)
         # be sure that is it a string
@@ -68,8 +79,14 @@ module Padrino
         ].map { |path| File.join(*path.compact) }
       end
       
-      def views_path
-        @views_path || Padrino::Mailer::Base.views_path
+      def deliver
+        self.delivery_method(:smtp, smtp_settings) if self.delivery_method.nil? || self.delivery_method.to_s =~ /smtp/
+        super
+      end
+      
+      def attributes
+        { :from => self.from, :to => self.to, :smtp => self.smtp_settings, 
+          :subject => self.subject, :content_type => self.content_type}
       end
     end # Message
   end # Mailer
