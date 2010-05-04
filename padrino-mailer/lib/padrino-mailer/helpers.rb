@@ -1,13 +1,21 @@
 module Padrino
   module Mailer
     module Helpers
+      def self.included(base) #:nodoc:
+        base.extend(ClassMethods)
+      end
+      
       ##
       # Delivers an email with the given mail attributes (to, from, subject, cc, bcc, body, et.al)
       #
       # ==== Examples
-      #
-      #   email :to => @user.email, :from => "awesomeness@example.com",
-      #         :subject => "Welcome to Awesomeness!", :body => haml(:some_template)
+      # 
+      #   email do
+      #     to @user.email
+      #     from "awesomeness@example.com",
+      #     subject "Welcome to Awesomeness!"
+      #     body 'path/to/my/template', :locals => { :a => a, :b => b }
+      #   end
       #
       def email(mail_attributes={}, &block)
         message = Padrino::Mailer::Message.new
@@ -30,13 +38,9 @@ module Padrino
         self.class.deliver(mailer_name, message_name, *attributes)
       end
 
-      def self.included(base)
-        base.extend(ClassMethods)
-      end
-
       module ClassMethods
         def inherited(subclass) #:nodoc:
-          @_mailers ||= {}
+          @_registered_mailers ||= {}
           super(subclass)
         end
 
@@ -44,7 +48,7 @@ module Padrino
         # Returns all registered mailers for this application
         #
         def registered_mailers
-          @_mailers ||= {}
+          @_registered_mailers ||= {}
         end
 
         ##

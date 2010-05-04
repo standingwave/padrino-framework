@@ -25,9 +25,7 @@ module Padrino
     #
     class Message < ::Mail::Message
       alias :via  :delivery_method
-      attr_accessor :mailer_name
-      attr_accessor :views_path
-      attr_accessor :smtp_settings
+      attr_accessor :views_path, :mailer_name, :smtp_settings
       
       def views(value=nil)
         self.views_path = value if value

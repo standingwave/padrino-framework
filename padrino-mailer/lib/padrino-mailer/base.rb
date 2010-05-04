@@ -29,7 +29,19 @@ module Padrino
         self.messages ||= {}
         instance_eval(&block)
       end
-      
+
+      ##
+      # Defines a mailer object allowing the definition of various email messages that can be delivered
+      #
+      # ==== Examples
+      #
+      #   message :birthday do |name, age|
+      #     subject "Happy Birthday!"
+      #     to   'john@fake.com'
+      #     from 'noreply@birthday.com'
+      #     body 'name' => name, 'age' => age
+      #   end
+      #
       def message(name, &block)
         raise "The message '#{name}' is already defined" if self.messages[name].present?
         self.messages[name] = Proc.new { |*attrs|
