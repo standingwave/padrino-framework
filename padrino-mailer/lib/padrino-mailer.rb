@@ -5,13 +5,6 @@ rescue LoadError
   require 'sinatra/tilt'
 end
 require 'padrino-core/support_lite'
-
-require 'net/smtp'
-begin
-  require 'smtp_tls'
-rescue LoadError
-end
-require 'base64'
 require 'mail'
 
 Dir[File.dirname(__FILE__) + '/padrino-mailer/**/*.rb'].each { |file| require file }
