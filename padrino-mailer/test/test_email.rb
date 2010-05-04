@@ -71,7 +71,7 @@ class TestEmail < Test::Unit::TestCase
         register Padrino::Mailer
         set :views, File.dirname(__FILE__) + '/fixtures/views'
         mailer :alternate do
-          message :foo do
+          email :foo do
             from    'padrino@me.com'
             to      'padrino@you.com'
             subject 'Hello there Padrino'
@@ -95,8 +95,8 @@ class TestEmail < Test::Unit::TestCase
         mock_app do
           register Padrino::Mailer
           mailer :foo do
-            message :bar do; end
-            message :bar do; end
+            email :bar do; end
+            email :bar do; end
           end
         end
       end
