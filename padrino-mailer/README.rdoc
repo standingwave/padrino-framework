@@ -45,11 +45,11 @@ Padrino also supports more structured mailers. We can define a custom mailer usi
 
   # app/mailers/sample_mailer.rb
   MyAppName.mailers :sample do
-    message :registration_email do |name|
+    email :registration do |name|
       from 'admin@site.com'
       to user_email_address
       subject 'Welcome to the site!'
-      body    render('registration_email', :locals => { :name => name })
+      body    render('registration', :locals => { :name => name })
       type    'html'             # optional, defaults to plain/text
       charset 'windows-1252'     # optional, defaults to utf-8
       via     :sendmail          # optional, smtp if defined otherwise sendmail

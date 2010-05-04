@@ -57,7 +57,7 @@ module Padrino
         # ==== Examples
         #
         #   mailer :sample do
-        #     message :birthday do |name, age|
+        #     email :birthday do |name, age|
         #       subject "Happy Birthday!"
         #       to   'john@fake.com'
         #       from 'noreply@birthday.com'

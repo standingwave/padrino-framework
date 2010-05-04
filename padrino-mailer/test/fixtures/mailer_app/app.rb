@@ -17,7 +17,7 @@ class MailerDemo < Sinatra::Base
   register Padrino::Mailer
 
   mailer :sample do
-    message :birthday do |name, age|
+    email :birthday do |name, age|
       subject "Happy Birthday!"
       to   'john@fake.com'
       from 'noreply@birthday.com'
@@ -25,7 +25,7 @@ class MailerDemo < Sinatra::Base
       via  :test
     end
 
-    message :anniversary do |names, years_married|
+    email :anniversary do |names, years_married|
       subject "Happy anniversary!"
       to   'julie@fake.com'
       from 'noreply@anniversary.com'

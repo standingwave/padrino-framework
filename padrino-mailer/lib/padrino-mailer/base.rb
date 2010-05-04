@@ -35,14 +35,14 @@ module Padrino
       #
       # ==== Examples
       #
-      #   message :birthday do |name, age|
+      #   email :birthday do |name, age|
       #     subject "Happy Birthday!"
       #     to   'john@fake.com'
       #     from 'noreply@birthday.com'
       #     body 'name' => name, 'age' => age
       #   end
       #
-      def message(name, &block)
+      def email(name, &block)
         raise "The message '#{name}' is already defined" if self.messages[name].present?
         self.messages[name] = Proc.new { |*attrs|
           m = Padrino::Mailer::Message.new
@@ -53,6 +53,7 @@ module Padrino
           m
         }
       end
+      alias :message :email 
     end # Base
   end # Mailer
 end # Padrino
