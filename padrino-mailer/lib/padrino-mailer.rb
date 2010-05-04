@@ -7,7 +7,12 @@ end
 require 'padrino-core/support_lite'
 require 'mail'
 
-Dir[File.dirname(__FILE__) + '/padrino-mailer/**/*.rb'].each { |file| require file }
+# Require respecting order our dependencies
+require 'padrino-mailer/base'
+require 'padrino-mailer/helpers'
+require 'padrino-mailer/template'
+require 'padrino-mailer/message'
+require 'padrino-mailer/part'
 
 module Padrino
   ##
