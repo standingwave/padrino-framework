@@ -6,7 +6,7 @@ Mailer methods can be defined using the simple format:
     from 'admin@site.com'
     to   user.email
     subject 'Welcome to the site!'
-    body    :name => name
+    body    render('registration_email', :locals => { :name => name })
     content_type 'text/html'       # optional, defaults to plain/text
     charset 'windows-1252'         # optional, defaults to utf-8
     via     :sendmail              # optional, to smtp if defined, otherwise sendmail
@@ -14,6 +14,6 @@ Mailer methods can be defined using the simple format:
 
 =end
 
-<%= @app_name %>.mailers :<%= @short_name %> do
+<%= @app_name %>.mailer :<%= @short_name %> do
   # Message definitions here...
 end

@@ -64,6 +64,7 @@ module Padrino
         def mailer(name, &block)
           registered_mailers[name] = Padrino::Mailer::Base.new(name, &block)
         end
+        alias :mailers :mailer
 
         ##
         # Delivers a mailer message email with the given attributes
