@@ -11,12 +11,11 @@ module Padrino
       #
       def email(mail_attributes={}, &block)
         message = Padrino::Mailer::Message.new
-        mail_attributes.each_pair { |k, v| message.method(k).call(v) }
         message.instance_eval(&block) if block_given?
+        mail_attributes.each_pair { |k, v| message.method(k).call(v) }
         message.views_path    = Padrino::Mailer::Base::views_path
         message.smtp_settings = Padrino::Mailer::Base.smtp_settings
         message.deliver
-        message
       end
 
       ##
