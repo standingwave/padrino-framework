@@ -41,7 +41,7 @@ module Padrino
         end
 
         ##
-        # Returns all registered mailers
+        # Returns all registered mailers for this application
         #
         def registered_mailers
           @_mailers ||= {}

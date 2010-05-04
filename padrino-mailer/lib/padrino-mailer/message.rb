@@ -2,7 +2,7 @@ module Padrino
   module Mailer
     ##
     # This represents a particular mail object which will need to be sent
-    # A email requires the mail attributes and the delivery_settings
+    # An email requires the mail attributes and the delivery_settings
     #
     ##
     # Initialize a new Email
