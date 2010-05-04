@@ -2,16 +2,16 @@ ENV['PADRINO_ENV'] = 'test'
 PADRINO_ROOT = File.dirname(__FILE__) unless defined? PADRINO_ROOT
 
 class PadrinoApp < Padrino::Application
-  configure do
-    set :smtp_settings, {
-      :host   => 'smtp.gmail.com',
-      :port   => '587',
-      :tls    => true,
-      :user   => 'user',
-      :pass   => 'pass',
-      :auth   => :plain
-    }
-  end
+  register Padrino::Mailer
+
+  set :delivery_method, :smtp => {
+    :host   => 'smtp.gmail.com',
+    :port   => '587',
+    :tls    => true,
+    :user   => 'user',
+    :pass   => 'pass',
+    :auth   => :plain
+  }
 
   mailer :sample do
     email :birthday do |name, age|

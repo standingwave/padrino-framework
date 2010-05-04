@@ -2,19 +2,17 @@ require 'sinatra/base'
 require 'haml'
 
 class SinatraApp < Sinatra::Base
-  configure do
-    set :root, File.dirname(__FILE__)
-    set :smtp_settings, {
-      :host   => 'smtp.gmail.com',
-      :port   => '587',
-      :tls    => true,
-      :user   => 'user',
-      :pass   => 'pass',
-      :auth   => :plain
-    }
-  end
-
   register Padrino::Mailer
+
+  set :root, File.dirname(__FILE__)
+  set :delivery_method, :smtp => {
+    :host   => 'smtp.gmail.com',
+    :port   => '587',
+    :tls    => true,
+    :user   => 'user',
+    :pass   => 'pass',
+    :auth   => :plain
+  }
 
   mailer :sample do
     email :birthday do |name, age|

@@ -25,13 +25,13 @@ module Padrino
     #
     class Message < ::Mail::Message
       alias :via  :delivery_method
-      attr_accessor :views_path, :mailer_name, :smtp_settings
-      
+      attr_accessor :views_path, :mailer_name
+
       def views(value=nil)
         self.views_path = value if value
         self.views_path.to_s if self.views_path
       end
-      
+
       def mailer(value=nil)
         self.mailer_name = value if value
         self.mailer_name.to_s if self.mailer_name
@@ -76,15 +76,10 @@ module Padrino
           [views_path.to_s, 'mailers'],
         ].map { |path| File.join(*path.compact) }
       end
-      
-      def deliver
-        self.delivery_method(:smtp, smtp_settings) if self.delivery_method.nil? || self.delivery_method.to_s =~ /smtp/
-        super
-      end
-      
+
       def attributes
-        { :from => self.from, :to => self.to, :smtp => self.smtp_settings, 
-          :subject => self.subject, :content_type => self.content_type}
+        { :from => self.from, :to => self.to, :delivery_method => self.delivery_method,
+          :subject => self.subject, :content_type => self.content_type }
       end
     end # Message
   end # Mailer

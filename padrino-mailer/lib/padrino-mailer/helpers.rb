@@ -4,12 +4,12 @@ module Padrino
       def self.included(base) #:nodoc:
         base.extend(ClassMethods)
       end
-      
+
       ##
       # Delivers an email with the given mail attributes (to, from, subject, cc, bcc, body, et.al)
       #
       # ==== Examples
-      # 
+      #
       #   email do
       #     to @user.email
       #     from "awesomeness@example.com",
@@ -18,12 +18,7 @@ module Padrino
       #   end
       #
       def email(mail_attributes={}, &block)
-        message = Padrino::Mailer::Message.new
-        message.instance_eval(&block) if block_given?
-        mail_attributes.each_pair { |k, v| message.method(k).call(v) }
-        message.views_path    = Padrino::Mailer::Base::views_path
-        message.smtp_settings = Padrino::Mailer::Base.smtp_settings
-        message.deliver
+        self.class.email(mail_attributes, &block)
       end
 
       ##
@@ -66,7 +61,11 @@ module Padrino
         #   end
         #
         def mailer(name, &block)
-          registered_mailers[name] = Padrino::Mailer::Base.new(name, &block)
+          mailer                   = Padrino::Mailer::Base.new(name, &block)
+          mailer.views_path        = views
+          mailer.delivery_settings = delivery_settings
+          registered_mailers[name] = mailer
+          mailer
         end
         alias :mailers :mailer
 
@@ -81,7 +80,46 @@ module Padrino
         def deliver(mailer_name, message_name, *attributes)
           registered_mailers[mailer_name].messages[message_name].call(*attributes).deliver
         end
+
+        ##
+        # Delivers an email with the given mail attributes (to, from, subject, cc, bcc, body, et.al) using settings of
+        # the given app.
+        #
+        # ==== Examples
+        #
+        #   MyApp.email(:to => 'to@ma.il', :from => 'from@ma.il', :subject => 'Welcome!', :body => 'Welcome Here!')
+        #
+        #   # or if you prefer blocks
+        #
+        #   MyApp.email do
+        #     to @user.email
+        #     from "awesomeness@example.com",
+        #     subject "Welcome to Awesomeness!"
+        #     body 'path/to/my/template', :locals => { :a => a, :b => b }
+        #   end
+        #
+        def email(mail_attributes={}, &block)
+          message = Padrino::Mailer::Message.new
+          message.views_path = views
+          message.delivery_method(*delivery_settings)
+          message.instance_eval(&block) if block_given?
+          mail_attributes.each_pair { |k, v| message.method(k).call(v) }
+          message.deliver
+        end
+
+        private
+          ##
+          # Return the parsed delivery method
+          #
+          def delivery_settings
+            @_delivery_setting ||= begin
+              return [:sendmail, {}] unless respond_to?(:delivery_method)
+              return [delivery_method.keys[0], delivery_method.values[0]] if delivery_method.is_a?(Hash)
+              return [delivery_method, {}] if delivery_method.is_a?(Symbol)
+              [nil, {}]
+            end
+          end
       end
-    end
-  end
-end
+    end # Helpers
+  end # Mailer
+end # Padrino
