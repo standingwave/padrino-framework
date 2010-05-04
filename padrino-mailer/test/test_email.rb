@@ -28,11 +28,11 @@ class TestEmail < Test::Unit::TestCase
       mock_app do
         get "/" do
           email({
-                  :from    => 'padrino@me.com',
-                  :to      => 'padrino@you.com',
-                  :subject => 'Hello there Padrino',
-                  :body    => 'Body',
-                  :via     => :test
+            :from    => 'padrino@me.com',
+            :to      => 'padrino@you.com',
+            :subject => 'Hello there Padrino',
+            :body    => 'Body',
+            :via     => :test
           })
         end
       end
