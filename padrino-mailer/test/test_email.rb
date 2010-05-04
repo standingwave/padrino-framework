@@ -16,7 +16,7 @@ class TestEmail < Test::Unit::TestCase
         end
       end
       get "/"
-      assert response.ok?
+      assert ok?
       email = pop_last_delivery
       assert_equal ['padrino@me.com'],    email.from
       assert_equal ['padrino@you.com'],   email.to
@@ -37,7 +37,7 @@ class TestEmail < Test::Unit::TestCase
         end
       end
       get "/"
-      assert response.ok?
+      assert ok?
       email = pop_last_delivery
       assert_equal ['padrino@me.com'],    email.from
       assert_equal ['padrino@you.com'],   email.to
@@ -58,7 +58,7 @@ class TestEmail < Test::Unit::TestCase
         end
       end
       get "/"
-      assert response.ok?
+      assert ok?
       email = pop_last_delivery
       assert_equal ['padrino@me.com'],    email.from
       assert_equal ['padrino@you.com'],   email.to
@@ -82,7 +82,7 @@ class TestEmail < Test::Unit::TestCase
         get("/") { deliver(:alternate, :foo) }
       end
       get "/"
-      assert response.ok?
+      assert ok?
       email = @app.deliver(:alternate, :foo)
       assert_equal ['padrino@me.com'],    email.from
       assert_equal ['padrino@you.com'],   email.to
