@@ -57,7 +57,7 @@ module Padrino
         #       subject "Happy Birthday!"
         #       to   'john@fake.com'
         #       from 'noreply@birthday.com'
-        #       body 'name' => name, 'age' => age
+        #       body render('sample/birthday', :locals => { :name => name, :age => age })
         #     end
         #   end
         #

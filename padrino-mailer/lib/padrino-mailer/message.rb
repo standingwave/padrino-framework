@@ -20,7 +20,7 @@ module Padrino
     #     subject "Hey this is my subject",
     #     to      "info@padrinorb.org",
     #     from    "foo@bar.com",
-    #     body   "This is my body"
+    #     body    render('sample/birthday', :locals => { :name => name })
     #   }.deliver
     #
     class Message < ::Mail::Message
