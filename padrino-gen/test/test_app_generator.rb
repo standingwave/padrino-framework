@@ -39,10 +39,8 @@ class TestAppGenerator < Test::Unit::TestCase
       silence_logger { generate(:project, 'sample_project', '--root=/tmp', '--script=none', '-t=bacon') }
       silence_logger { generate(:app, 'demo_app', '--root=/tmp/sample_project') }
       silence_logger { generate(:mailer, 'demo', '-r=/tmp/sample_project', '-a=demo_app') }
-      assert_match_in_file(/DemoApp.mailers :demo/m, '/tmp/sample_project/demo_app/mailers/demo_mailer.rb')
-      assert_match_in_file(/Padrino::Mailer::Base.smtp_settings/m, '/tmp/sample_project/lib/mailer.rb')
-      assert_match_in_file(/register MailerInitializer/,'/tmp/sample_project/demo_app/app.rb')
-      assert_file_exists('/tmp/sample_project/demo_app/views/demo_mailer')
+      assert_match_in_file(/DemoApp.mailer :demo/m, '/tmp/sample_project/demo_app/mailers/demo.rb')
+      assert_dir_exists('/tmp/sample_project/demo_app/views/mailers/demo')
     end
   end
 end
