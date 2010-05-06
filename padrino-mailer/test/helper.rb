@@ -26,7 +26,6 @@ class Test::Unit::TestCase
   # the application.
   def mock_app(base=Padrino::Application, &block)
     @app = Sinatra.new(base, &block)
-    @app.register Padrino::Mailer
   end
 
   def app

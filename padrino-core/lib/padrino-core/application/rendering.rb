@@ -75,6 +75,23 @@ module Padrino
       end
     end
 
+    ##
+    # Return the request format, this is useful when we need to respond to a given content_type like:
+    #
+    # ==== Examples
+    #
+    #   get :index, :provides => :any do
+    #     case content_type
+    #       when :js    then ...
+    #       when :json  then ...
+    #       when :html  then ...
+    #     end
+    #   end
+    #
+    def content_type(type=nil, params={})
+      type.nil? ? @_content_type : super(type, params)
+    end
+
     private
       ##
       # Enhancing Sinatra render functionality for:
@@ -101,7 +118,7 @@ module Padrino
         options[:outvar] ||= '@_out_buf' if [:erb, :erubis] & [engine]
 
         # Resolve layouts similar to in Rails
-        if (options[:layout].nil? || options[:layout] == true) && !self.class.templates.has_key?(:layout)
+        if (options[:layout].nil? || options[:layout] == true) && !settings.templates.has_key?(:layout)
           options[:layout] = resolved_layout || false # We need to force layout false so sinatra don't try to render it
           logger.debug "Resolving layout #{options[:layout]}" if defined?(logger) && options[:layout].present?
         end
@@ -119,7 +136,7 @@ module Padrino
       # => "/layouts/custom"
       #
       def resolved_layout
-        located_layout = resolve_template(self.class.fetch_layout_path, :strict_format => true, :raise_exceptions => false)
+        located_layout = resolve_template(settings.fetch_layout_path, :strict_format => true, :raise_exceptions => false)
         located_layout ? located_layout[0] : false
       end
 
@@ -141,12 +158,12 @@ module Padrino
         # Fetch cached template for rendering options
         template_path = "/#{template_path}" unless template_path.to_s[0] == ?/
         rendering_options = [template_path, content_type, locale]
-        cached_template = self.class.fetch_template_file(rendering_options)
+        cached_template = settings.fetch_template_file(rendering_options)
         return cached_template if cached_template
 
         # Resolve view path and options
         options.reverse_merge!(DEFAULT_RENDERING_OPTIONS)
-        view_path = options.delete(:views) || self.options.views || self.class.views || "./views"
+        view_path = options.delete(:views) || settings.views || settings.views || "./views"
         target_extension = File.extname(template_path)[1..-1] || "none" # retrieves explicit template extension
         template_path = template_path.chomp(".#{target_extension}")
 
@@ -166,8 +183,8 @@ module Padrino
           templates.find { |file, e| file.to_s == "#{template_path}" && content_type == :html } ||
           templates.any? && !options[:strict_format] && templates.first # If not strict, fall back to the first located template
 
-        self.class.cache_template_file!(located_template, rendering_options) unless settings.reload_templates?
-        raise TemplateNotFound.new("Template path '#{template_path}' could not be located!") if !located_template && options[:raise_exceptions]
+        settings.cache_template_file!(located_template, rendering_options) unless settings.reload_templates?
+        raise TemplateNotFound, "Template path '#{template_path}' could not be located in '#{view_path}'!" if !located_template && options[:raise_exceptions]
         located_template
       end
 

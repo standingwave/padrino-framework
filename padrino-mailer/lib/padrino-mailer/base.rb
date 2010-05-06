@@ -25,11 +25,12 @@ module Padrino
     # and then all delivered mail will use these settings unless otherwise specified.
     #
     class Base
-      attr_accessor :delivery_settings, :views_path, :mailer_name, :messages
+      attr_accessor :delivery_settings, :app, :mailer_name, :messages
 
-      def initialize(name, &block) #:nodoc:
-        self.mailer_name = name
-        self.messages ||= {}
+      def initialize(app, name, &block) #:nodoc:
+        @mailer_name = name
+        @messages    = {}
+        @app         = app
         instance_eval(&block)
       end
 
@@ -48,12 +49,10 @@ module Padrino
       def email(name, &block)
         raise "The email '#{name}' is already defined" if self.messages[name].present?
         self.messages[name] = Proc.new { |*attrs|
-          m = Padrino::Mailer::Message.new
-          m.views_path = self.views_path
-          m.mailer_name = self.mailer_name
-          m.delivery_method(*delivery_settings)
-          m.instance_exec(*attrs, &block)
-          m
+          message = Mail::Message.new(self.app)
+          message.delivery_method(*delivery_settings)
+          message.instance_exec(*attrs, &block)
+          message
         }
       end
       alias :message :email

@@ -18,7 +18,7 @@ module Padrino
       #   end
       #
       def email(mail_attributes={}, &block)
-        self.class.email(mail_attributes, &block)
+        settings.email(mail_attributes, &block)
       end
 
       ##
@@ -30,7 +30,7 @@ module Padrino
       #   deliver(:example, :message, "John")
       #
       def deliver(mailer_name, message_name, *attributes)
-        self.class.deliver(mailer_name, message_name, *attributes)
+        settings.deliver(mailer_name, message_name, *attributes)
       end
 
       module ClassMethods
@@ -61,8 +61,7 @@ module Padrino
         #   end
         #
         def mailer(name, &block)
-          mailer                   = Padrino::Mailer::Base.new(name, &block)
-          mailer.views_path        = views
+          mailer                   = Padrino::Mailer::Base.new(self, name, &block)
           mailer.delivery_settings = delivery_settings
           registered_mailers[name] = mailer
           mailer
@@ -99,8 +98,7 @@ module Padrino
         #   end
         #
         def email(mail_attributes={}, &block)
-          message = Padrino::Mailer::Message.new
-          message.views_path = views
+          message = Mail::Message.new(self)
           message.delivery_method(*delivery_settings)
           message.instance_eval(&block) if block_given?
           mail_attributes.each_pair { |k, v| message.method(k).call(v) }

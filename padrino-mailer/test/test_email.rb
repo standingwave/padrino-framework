@@ -1,10 +1,12 @@
 require File.expand_path(File.dirname(__FILE__) + '/helper')
 
 class TestEmail < Test::Unit::TestCase
+
   context 'the mailer in a app' do
 
     should 'send a basic inline email' do
       mock_app do
+        register Padrino::Mailer
         get "/" do
           email do
             from    'padrino@me.com'
@@ -26,6 +28,7 @@ class TestEmail < Test::Unit::TestCase
 
     should 'send a basic inline from hash' do
       mock_app do
+        register Padrino::Mailer
         get "/" do
           email({
             :from    => 'padrino@me.com',
@@ -47,12 +50,14 @@ class TestEmail < Test::Unit::TestCase
 
     should 'send a email inline' do
       mock_app do
+        register Padrino::Mailer
         get "/" do
           email do
+            views   File.dirname(__FILE__) + '/fixtures'
             from    'padrino@me.com'
             to      'padrino@you.com'
             subject 'Hello there Padrino'
-            body    render(File.dirname(__FILE__) + '/fixtures/basic.erb')
+            body    render('basic')
             via     :test
           end
         end
@@ -75,7 +80,7 @@ class TestEmail < Test::Unit::TestCase
             from    'padrino@me.com'
             to      'padrino@you.com'
             subject 'Hello there Padrino'
-            body    render('foo')
+            body    render('alternate/foo')
             via     :test
           end
         end

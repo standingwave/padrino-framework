@@ -54,23 +54,6 @@ module Padrino
     end
 
     ##
-    # Return the request format, this is useful when we need to respond to a given content_type like:
-    #
-    # ==== Examples
-    #
-    #   get :index, :provides => :any do
-    #     case content_type
-    #       when :js    then ...
-    #       when :json  then ...
-    #       when :html  then ...
-    #     end
-    #   end
-    #
-    def content_type(type=nil, params={})
-      type.nil? ? @_content_type : super(type, params)
-    end
-
-    ##
     # Method for deliver static files.
     #
     def static!
