@@ -30,6 +30,7 @@ module Padrino
       def initialize(app, name, &block) #:nodoc:
         @mailer_name = name
         @messages    = {}
+        @defaults    = {}
         @app         = app
         instance_eval(&block)
       end
@@ -50,7 +51,7 @@ module Padrino
         raise "The email '#{name}' is already defined" if self.messages[name].present?
         self.messages[name] = Proc.new { |*attrs|
           message = Mail::Message.new(self.app)
-          message.defaults = @defaults if @defaults.is_a?(Hash)
+          message.defaults = self.defaults if self.defaults.is_a?(Hash)
           message.delivery_method(*delivery_settings)
           message.instance_exec(*attrs, &block)
           message
@@ -58,7 +59,7 @@ module Padrino
       end
       alias :message :email
       
-      # Defines the default attributes for a message in this mailer
+      # Defines the default attributes for a message in this mailer (including app-wide defaults)
       # 
       # ==== Examples
       #
@@ -67,8 +68,12 @@ module Padrino
       #    email(:foo) do ... end
       #  end
       # 
-      def defaults(attributes)
-        @defaults = attributes
+      def defaults(attributes=nil)
+        if attributes.nil? # Retrieve the default values
+          @app.respond_to?(:mailer_defaults) ? @defaults.reverse_merge(@app.mailer_defaults) : @defaults
+        else # updates the default values
+          @defaults = attributes
+        end
       end
     end # Base
   end # Mailer

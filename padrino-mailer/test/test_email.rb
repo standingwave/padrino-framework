@@ -71,7 +71,7 @@ class TestEmail < Test::Unit::TestCase
       assert_equal 'This is a body of text from a template', email.body.to_s
     end
 
-    should 'send emails with mailer defaults' do
+    should 'send emails with scoped mailer defaults' do
       mock_app do
         register Padrino::Mailer
         set :views, File.dirname(__FILE__) + '/fixtures/views'
@@ -92,6 +92,29 @@ class TestEmail < Test::Unit::TestCase
       assert_equal ['padrino@from.com'],    email.from, "should have used default value"
       assert_equal ['padrino@different.com'],   email.to, "should have overwritten default value"
       assert_equal 'Hello there again Padrino', email.subject
+      assert_equal 'This is a foo message in mailers/alternate dir', email.body.to_s
+    end
+    
+    should 'send emails with app mailer defaults' do
+      mock_app do
+        register Padrino::Mailer
+        set :views, File.dirname(__FILE__) + '/fixtures/views'
+        set :mailer_defaults, :from => 'padrino@from.com', :to => 'padrino@to.com', :subject => "This is a test"
+        mailer :alternate do
+          email :foo do
+            to 'padrino@different.com'
+            body    render('alternate/foo')
+            via     :test
+          end
+        end
+        get("/") { deliver(:alternate, :foo) }
+      end
+      get "/"
+      assert ok?
+      email = pop_last_delivery
+      assert_equal ['padrino@from.com'],    email.from, "should have used default value"
+      assert_equal ['padrino@different.com'],   email.to, "should have overwritten default value"
+      assert_equal 'This is a test', email.subject
       assert_equal 'This is a foo message in mailers/alternate dir', email.body.to_s
     end
 
