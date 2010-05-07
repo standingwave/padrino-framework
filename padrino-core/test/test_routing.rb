@@ -1,6 +1,14 @@
 require File.expand_path(File.dirname(__FILE__) + '/helper')
 
 class TestRouting < Test::Unit::TestCase
+  class RoutingApp < Sinatra::Base
+    register ::Padrino::Routing
+    set :environment, :test
+  end
+
+  def mock_app(base=RoutingApp, &block)
+    @app = Sinatra.new(base, &block)
+  end
 
   should 'ignore trailing delimiters for basic route' do
     mock_app do
@@ -464,7 +472,7 @@ class TestRouting < Test::Unit::TestCase
       provides :xml
 
       get("/foo"){ "Foo in #{content_type}" }
-      get("/bar"){ "Bar in #{content_type}" }
+      get("/bar"){ raise if content_type != nil }
     end
 
     get '/foo', {}, { 'HTTP_ACCEPT' => 'application/xml' }
@@ -473,7 +481,7 @@ class TestRouting < Test::Unit::TestCase
     assert not_found?
 
     get '/bar', {}, { 'HTTP_ACCEPT' => 'application/xml' }
-    assert_equal 'Bar in html', body
+    assert 200, status
   end
 
   should "set content_type to :html for both empty Accept as well as Accept text/html" do
