@@ -6,14 +6,15 @@ class SinatraApp < Sinatra::Base
 
   set :root, File.dirname(__FILE__)
   set :delivery_method, :smtp => {
-    :host   => 'smtp.gmail.com',
-    :port   => '587',
-    :tls    => true,
-    :user   => 'user',
-    :pass   => 'pass',
-    :auth   => :plain
+    :address              => "smtp.gmail.com",
+    :port                 => 587,
+    :domain               => 'your.host.name',
+    :user_name            => '<username>',
+    :password             => '<password>',
+    :authentication       => 'plain',
+    :enable_starttls_auto => true
   }
-
+  
   mailer :sample do
     email :birthday do |name, age|
       subject "Happy Birthday!"
