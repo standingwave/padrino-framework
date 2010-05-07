@@ -18,6 +18,8 @@ module Mail
         settings.views = File.expand_path("./mailers")
         settings.reload_templates = true
       end
+      
+      # Run the original initialize
       initialize_without_app(*args, &block)
     end
     alias_method_chain :initialize, :app
@@ -56,6 +58,12 @@ module Mail
     # Returns true if the templates will be reloaded; false otherwise.
     def self.reload_templates?
       @_reload_templates
+    end
+    
+    # Modify the default attributes for this message (if not explicitly specified)
+    def defaults=(attributes)
+      @_defaults = attributes
+      @_defaults.each_pair { |k, v| default(k.to_sym, v) } if @_defaults.is_a?(Hash)
     end
 
     private

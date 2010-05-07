@@ -50,12 +50,26 @@ module Padrino
         raise "The email '#{name}' is already defined" if self.messages[name].present?
         self.messages[name] = Proc.new { |*attrs|
           message = Mail::Message.new(self.app)
+          message.defaults = @defaults if @defaults.is_a?(Hash)
           message.delivery_method(*delivery_settings)
           message.instance_exec(*attrs, &block)
           message
         }
       end
       alias :message :email
+      
+      # Defines the default attributes for a message in this mailer
+      # 
+      # ==== Examples
+      #
+      #   mailer :alternate do
+      #    defaults :from => 'padrino@from.com', :to => 'padrino@to.com'
+      #    email(:foo) do ... end
+      #  end
+      # 
+      def defaults(attributes)
+        @defaults = attributes
+      end
     end # Base
   end # Mailer
 end # Padrino
