@@ -40,14 +40,14 @@ class Account < CouchRest::ExtendedDocument
   end
 
   ##
-  # This method is used for retrive the original password.
+  # This method is used to retrieve the original password.
   #
   def password_clean
     crypted_password.decrypt(salt)
   end
 
   ##
-  # This method is used for retrive the first record by id without raise errors if not found.
+  # This method is used to retrieve the first record by id without raise errors if not found.
   #
   def self.find_by_id(id)
     id_array = self.by_id :key => id
@@ -57,7 +57,7 @@ class Account < CouchRest::ExtendedDocument
   private
     def generate_password
       return if password.blank?
-      self.salt = Digest::SHA1.hexdigest("--#{Time.now.to_s}--#{email}--") if new_record?
+      self.salt = Digest::SHA1.hexdigest("--#{Time.now.to_s}--#{email}--") if self.salt.blank?
       self.crypted_password = password.encrypt(self.salt)
     end
 
@@ -66,8 +66,13 @@ class Account < CouchRest::ExtendedDocument
     end
 
     def email_is_unique
-      Account.by_email(:key => self.email, :limit => 1).empty? ||
-        Account.by_email(:key => self.email, :limit => 1) == [self] ||
-        [false, "Email has already been taken"]
+      account = Account.by_email(:key => self.email, :limit => 1)
+      return true if account.empty? # didn't find email in the database
+      account = account[0]
+      if self.has_key?("_id")
+        # there is an id, make sure updates are being applied to same account
+        return true if self["_id"] == account["_id"]
+      end
+      [false, "Email has already been taken"] 
     end
 end
