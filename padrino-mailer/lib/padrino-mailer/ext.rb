@@ -18,7 +18,7 @@ module Mail
         settings.views = File.expand_path("./mailers")
         settings.reload_templates = true
       end
-      
+
       # Run the original initialize
       initialize_without_app(*args, &block)
     end
@@ -59,7 +59,7 @@ module Mail
     def self.reload_templates?
       @_reload_templates
     end
-    
+
     # Modify the default attributes for this message (if not explicitly specified)
     def defaults=(attributes)
       @_defaults = attributes
@@ -67,13 +67,12 @@ module Mail
     end
 
     private
-    
-    # Defines the render for the mailer utilizing the padrino 'rendering' module
-    def render(engine, data=nil, options={}, locals={}, &block)
-      # Reload templates
-      @template_cache.clear if settings.reload_templates?
-      # Pass arguments to Sinatra/Padrino render method
-      super(engine, data, options, locals, &block)
-    end
+      # Defines the render for the mailer utilizing the padrino 'rendering' module
+      def render(engine, data=nil, options={}, locals={}, &block)
+        # Reload templates
+        @template_cache.clear if settings.reload_templates?
+        # Pass arguments to Sinatra/Padrino render method
+        super(engine, data, options, locals, &block)
+      end
   end
 end
