@@ -38,6 +38,7 @@ module Padrino
             when :mongoid      then @klass.fields.values
             when :mongomapper  then @klass.keys.values.reject { |key| key.name == "_id" } # On MongoMapper keys are an hash
             when :sequel       then @klass.db_schema.map { |k,v| Column.new(k, v[:type]) }
+            when :simple_record then @klass.attributes
             else raise OrmError, "Adapter #{orm} is not yet supported!"
           end
         end
@@ -57,7 +58,7 @@ module Padrino
 
         def find(params=nil)
           case orm
-            when :activerecord, :mongomapper, :mongoid then "#{klass_name}.find(#{params})"
+            when :activerecord, :mongomapper, :mongoid, :simple_record then "#{klass_name}.find(#{params})"
             when :datamapper, :couchrest   then "#{klass_name}.get(#{params})"
             when :sequel then "#{klass_name}[#{params}]"
             else raise OrmError, "Adapter #{orm} is not yet supported!"
@@ -81,7 +82,7 @@ module Padrino
 
         def update_attributes(params=nil)
           case orm
-            when :activerecord, :mongomapper, :mongoid, :couchrest then "@#{name_singular}.update_attributes(#{params})"
+            when :activerecord, :mongomapper, :mongoid, :couchrest, :simple_record then "@#{name_singular}.update_attributes(#{params})"
             when :datamapper then "@#{name_singular}.update(#{params})"
             when :sequel then "@#{name_singular}.modified! && @#{name_singular}.update(#{params})"
             else raise OrmError, "Adapter #{orm} is not yet supported!"

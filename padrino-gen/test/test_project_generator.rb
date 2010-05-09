@@ -146,6 +146,19 @@ class TestProjectGenerator < Test::Unit::TestCase
       assert_match_in_file(/CouchRest.database!/, '/tmp/sample_project/config/database.rb')
       assert_dir_exists('/tmp/sample_project/app/models')
     end
+    
+    should "properly generate default for simple_record" do
+      buffer = silence_logger { generate(:project, 'sample_project', '--root=/tmp', '--orm=simple_record', '--script=none') }
+      assert_match /Applying.*?simple_record.*?orm/, buffer
+      assert_match_in_file(/gem 'uuidtools-2.1.1'/, '/tmp/sample_project/Gemfile')
+      assert_match_in_file(/gem 'http_connection-1.3.0'/, '/tmp/sample_project/Gemfile')
+      assert_match_in_file(/gem 'xml-simple-1.0.12'/, '/tmp/sample_project/Gemfile')
+      assert_match_in_file(/gem 'aws-2.3.8'/, '/tmp/sample_project/Gemfile')
+      assert_match_in_file(/gem 'simple_record-1.2.1'/, '/tmp/sample_project/Gemfile')
+      
+      assert_match_in_file(/SimpleRecord.setup/, '/tmp/sample_project/config/database.rb')
+      assert_dir_exists('/tmp/sample_project/app/models')
+    end
   end
 
   context "the generator for renderer component" do
